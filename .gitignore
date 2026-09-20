@@ -35,6 +35,7 @@
 !*.modinfo
 !*.mp3
 !*.natvis
+!*.nix
 !*.py
 !*.rc
 !*.rtf
@@ -43,8 +44,12 @@
 !*.txt
 !*.vcxproj
 !*.yml
+!flake.lock
 
 !docs/images/*
+
+# Local pristine IGE reference used to reconstruct focused commits
+scratch/InGame Editor+ (v 47)/
 
 #the following files should never be changed
 (2) Vox Populi/Mapscripts/EMP
@@ -61,6 +66,13 @@ Output/
 #ignore clang build intermediates
 clang-build/
 clang-output/
+
+#ignore local MSVC/Wine toolchain experiments and generated build artifacts
+/msvc-build/
+/.vp-wine-*/
+/.vp-msvc-test/
+__pycache__/
+*.pyc
 
 #ignore output from any other IDEs/tools
 .idea/

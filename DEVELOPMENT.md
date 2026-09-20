@@ -20,6 +20,7 @@
   * You can disable Whole Program Optimization locally under Project > VoxPopuli Properties > C/C++ > Optimization > Whole Program Optimization (set it to No)
 * If the compiler stops responding at the end of pass 2, try deleting the hidden .vs folder as well as the BuildOutput/BuildTemp folders in the project directory, then reopening the solution file.
 * There are also clang-based build scripts available (`build_vp_clang.py` for local dev, `build_vp_clang_sdk.py` for CI). See the [Build Toolchain Guide](docs/build-toolchain.md#alternative-clang-build) for details.
+* On NixOS/Linux, use the repository flake to cross-compile the Win32 MSVC-ABI DLL. See the [NixOS/Linux Build Guide](docs/nix-build.md).
 
 **Note for contributors:** Please verify your changes compile without new warnings in both MSVC and clang builds before submitting a PR. CI runs both compilers.
 
