@@ -24,7 +24,8 @@ UPDATE Units SET FaithCost = 300 WHERE CombatClass = 'UNITCOMBAT_INQUISITOR';
 -- Missiles and nukes
 UPDATE Units SET Cost = 400 WHERE Class = 'UNITCLASS_ROCKET_MISSILE';
 UPDATE Units SET Cost = 1200 WHERE Class = 'UNITCLASS_GUIDED_MISSILE';
-UPDATE Units SET Cost = 3500 WHERE Class = 'UNITCLASS_ATOMIC_BOMB';
+-- One-third of the Nuclear Missile cost, rounded to the nearest whole production point.
+UPDATE Units SET Cost = 1867 WHERE Class = 'UNITCLASS_ATOMIC_BOMB';
 UPDATE Units SET Cost = 5600 WHERE Class = 'UNITCLASS_NUCLEAR_MISSILE';
 
 -- Spaceship parts

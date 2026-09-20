@@ -66,6 +66,12 @@ inline float range(float fNum, float fLow, float fHigh)
 	}
 }
 
+inline int getNuclearBlastRadius(int iDamageLevel)
+{
+	const int iConfiguredRadius = iDamageLevel >= 2 ? GC.getNUKE_BLAST_RADIUS() : GC.getNUKE_LEVEL1_BLAST_RADIUS();
+	return range(iConfiguredRadius, 1, 5);
+}
+
 inline int wrapCoordDifference(int iDiff, uint uiRange, bool bWrap)
 {
 	if(bWrap)

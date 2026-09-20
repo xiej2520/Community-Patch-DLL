@@ -8757,7 +8757,7 @@ bool CvUnit::isNukeVictim(const CvPlot* pPlot, TeamTypes eTeam) const
 		return false;
 	}
 
-	int iBlastRadius = /*2*/ range(GD_INT_GET(NUKE_BLAST_RADIUS), 1, 5);
+	int iBlastRadius = getNuclearBlastRadius(GetNukeDamageLevel());
 
 	for(iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
 	{
@@ -15763,7 +15763,17 @@ int CvUnit::GetRange() const
 {
 	VALIDATE_OBJECT();
 
-	return (m_pUnitInfo->GetRange() + m_iExtraRange);
+	int iRange = m_pUnitInfo->GetRange() + m_iExtraRange;
+	if (m_pUnitInfo->GetNukeDamageLevel() == 1 && getTeam() != NO_TEAM)
+	{
+		const TechTypes eAdvancedBallistics = (TechTypes)GC.getInfoTypeForString("TECH_ADVANCED_BALLISTICS");
+		if (eAdvancedBallistics != NO_TECH && GET_TEAM(getTeam()).GetTeamTechs()->HasTech(eAdvancedBallistics))
+		{
+			iRange = max(iRange, GD_INT_GET(NUKE_LEVEL1_ADVANCED_BALLISTICS_RANGE));
+		}
+	}
+
+	return iRange;
 }
 
 //	--------------------------------------------------------------------------------

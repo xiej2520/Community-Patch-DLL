@@ -5336,6 +5336,13 @@ bool CvTacticalAI::ShouldRebase(CvUnit* pUnit) const
 						CvPlot* pTargetPlot = GC.getMap().plot(m_AllTargets[iI].GetTargetX(), m_AllTargets[iI].GetTargetY());
 						if (pTargetPlot->getPlotCity()->isInDangerOfFalling())
 							continue;
+
+						if (plotDistance(pUnit->getX(), pUnit->getY(), m_AllTargets[iI].GetTargetX(), m_AllTargets[iI].GetTargetY()) <= pUnit->GetRange())
+						{
+							bIsNeeded = true;
+							break;
+						}
+						continue;
 					}
 
 					// Is the target of an appropriate type?
@@ -13027,4 +13034,3 @@ const char* assignmentTypeNames[] =
 	"HEAL",
 	"WAIT"
 };
-

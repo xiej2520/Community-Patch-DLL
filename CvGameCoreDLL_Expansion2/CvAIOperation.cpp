@@ -2666,7 +2666,7 @@ bool CvAIOperationNukeAttack::CheckTransitionToNextStage()
 			if(pNuke && pNuke->canMove() && pNuke->canNukeAt(pNuke->plot(),pTargetPlot->getX(),pTargetPlot->getY()))
 			{
 				//try to save any units we have nearby
-				int iBlastRadius = /*2*/ range(GD_INT_GET(NUKE_BLAST_RADIUS), 1, 5);
+				int iBlastRadius = getNuclearBlastRadius(pNuke->GetNukeDamageLevel());
 				for (int i=0; i<RING_PLOTS[iBlastRadius]; i++)
 				{
 					CvPlot* pLoopPlot = iterateRingPlots(pTargetPlot,i);
@@ -2681,16 +2681,16 @@ bool CvAIOperationNukeAttack::CheckTransitionToNextStage()
 						if (pLoopUnit && pLoopUnit->getOwner() == m_eOwner && pLoopUnit->canMove())
 						{
 							CvPlot* pBestPlot = NULL;
-							int iBestDanger = 0;
+							int iBestDanger = INT_MAX;
 							ReachablePlots reachablePlots = pLoopUnit->GetAllPlotsInReachThisTurn();
 							for (ReachablePlots::iterator it = reachablePlots.begin(); it != reachablePlots.end(); ++it)
 							{
 								CvPlot* pFleePlot = GC.getMap().plotByIndexUnchecked(it->iPlotIndex);
 								if (plotDistance(*pFleePlot, *pTargetPlot) > iBlastRadius)
 								{
-									if (!pBestPlot || iBestDanger < pLoopUnit->GetDanger(pFleePlot))
+									if (!pBestPlot || pLoopUnit->GetDanger(pFleePlot) < iBestDanger)
 									{
-										iBestDanger = pLoopUnit->GetDanger(pLoopPlot);
+										iBestDanger = pLoopUnit->GetDanger(pFleePlot);
 										pBestPlot = pFleePlot;
 									}
 								}
@@ -2707,7 +2707,7 @@ bool CvAIOperationNukeAttack::CheckTransitionToNextStage()
 				if(GC.getLogging() && GC.getAILogging())
 				{
 					CvString strMsg;
-					strMsg.Format("City nuked at (%d:%d)", pTargetPlot->getX(), pTargetPlot->getY());
+					strMsg.Format("Nuclear strike at (%d:%d)", pTargetPlot->getX(), pTargetPlot->getY());
 					LogOperationSpecialMessage(strMsg);
 				}
 
@@ -2723,40 +2723,55 @@ bool CvAIOperationNukeAttack::CheckTransitionToNextStage()
 CvPlot* CvAIOperationNukeAttack::FindBestTarget(CvPlot** ppMuster) const
 {
 	CvUnit* pBestUnit = NULL;
-	CvCity* pBestCity = NULL;
-	int iBestCity = 0;
+	CvPlot* pBestTarget = NULL;
+	int iBestTarget = 0;
 	int iUnitLoop = 0;
-	int iCityLoop = 0;
 	CvPlayerAI& ownerPlayer = GET_PLAYER(m_eOwner);
 	TeamTypes eTeam = ownerPlayer.getTeam();
 	CvTeam& ourTeam = GET_TEAM(eTeam);
 	CvPlayerAI& enemyPlayer = GET_PLAYER(m_eEnemy);
-
 	// check all of our units to find the nukes
 	for(CvUnit* pLoopUnit = ownerPlayer.firstUnit(&iUnitLoop); pLoopUnit != NULL; pLoopUnit = ownerPlayer.nextUnit(&iUnitLoop))
 	{
-		if (!pLoopUnit->canNuke())
+		if (!pLoopUnit->canNuke() || pLoopUnit->getArmyID() != -1)
 			continue;
 
-		// for all cities of this enemy
+		int iBlastRadius = getNuclearBlastRadius(pLoopUnit->GetNukeDamageLevel());
+
+		// Candidate centers are enemy cities and visible concentrations of enemy
+		// units. The old code considered city centers only.
+		set<int> candidatePlots;
+		int iCityLoop = 0;
 		for(CvCity* pLoopCity = enemyPlayer.firstCity(&iCityLoop); pLoopCity != NULL; pLoopCity = enemyPlayer.nextCity(&iCityLoop))
 		{
-			//in range?
-			if (plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pLoopCity->getX(), pLoopCity->getY()) > pLoopUnit->GetRange())
-				continue;
-
 			//don't nuke if we're about to capture it or if it was captured from us
 			if (pLoopCity->isInDangerOfFalling() || pLoopCity->getOriginalOwner()==m_eOwner)
 				continue;
+			candidatePlots.insert(pLoopCity->plot()->GetPlotIndex());
+		}
 
-			CvPlot* pCityPlot = pLoopCity->plot();
-			int iThisCityValue = 0;
+		int iEnemyUnitLoop = 0;
+		for(CvUnit* pEnemyUnit = enemyPlayer.firstUnit(&iEnemyUnitLoop); pEnemyUnit != NULL; pEnemyUnit = enemyPlayer.nextUnit(&iEnemyUnitLoop))
+		{
+			if (!pEnemyUnit->isDelayedDeath() && pEnemyUnit->plot()->isVisible(eTeam))
+				candidatePlots.insert(pEnemyUnit->plot()->GetPlotIndex());
+		}
 
-			// check to see if there is anything good or bad in the radius that we should account for
-			int iBlastRadius = /*2*/ range(GD_INT_GET(NUKE_BLAST_RADIUS), 1, 5);
+		for(set<int>::const_iterator itCandidate = candidatePlots.begin(); itCandidate != candidatePlots.end(); ++itCandidate)
+		{
+			CvPlot* pTargetPlot = GC.getMap().plotByIndexUnchecked(*itCandidate);
+			if (!pLoopUnit->canNukeAt(pLoopUnit->plot(), pTargetPlot->getX(), pTargetPlot->getY()))
+				continue;
+
+			int iTargetValue = 0;
+			int iEnemyUnitsHit = 0;
+			bool bEnemyCityHit = false;
+
+			// Check everything in the blast radius, including cities when the
+			// chosen center is an enemy formation rather than a city.
 			for (int i=0; i<RING_PLOTS[iBlastRadius]; i++)
 			{
-				CvPlot* pLoopPlot = iterateRingPlots(pCityPlot,i);
+				CvPlot* pLoopPlot = iterateRingPlots(pTargetPlot,i);
 				if (!pLoopPlot)
 					continue;
 
@@ -2764,45 +2779,71 @@ CvPlot* CvAIOperationNukeAttack::FindBestTarget(CvPlot** ppMuster) const
 				PlayerTypes ePlotOwner = pLoopPlot->getOwner();
 				TeamTypes ePlotTeam = pLoopPlot->getTeam();
 
-				//Nukes have hit here already, let's not target this place again.
-				if(pLoopPlot->IsFeatureFallout() && pCityPlot->getOwner() == pLoopPlot->getOwner())
-				{
-					iThisCityValue -= 5000;
-				}
+				// Repeated strikes have diminishing value, but existing fallout must
+				// not categorically veto a strike against fresh reinforcements.
+				if(pLoopPlot->IsFeatureFallout() && ePlotTeam != NO_TEAM && ourTeam.isAtWar(ePlotTeam))
+					iTargetValue -= 150;
 
 				if(ePlotOwner == m_eOwner)
 				{
-					iThisCityValue -= 1;
+					iTargetValue -= 5;
 					if(pLoopPlot->getImprovementType() != NO_IMPROVEMENT)
 					{
 						if(!pLoopPlot->IsImprovementPillaged())
 						{
-							iThisCityValue -= 50;
+							iTargetValue -= 50;
 							if(pLoopPlot->getResourceType(ePlotTeam) != NO_RESOURCE)  // we aren't nuking our own resources
 							{
-								iThisCityValue -= 100;
+								iTargetValue -= 100;
 							}
 						}
 					}
 				}
 				else if(ePlotTeam != NO_TEAM && ourTeam.isAtWar(ePlotTeam))
 				{
-					iThisCityValue += 1;
+					iTargetValue += 5;
 					if(pLoopPlot->getImprovementType() != NO_IMPROVEMENT)
 					{
 						if(!pLoopPlot->IsImprovementPillaged())
 						{
-							iThisCityValue += 20;
+							iTargetValue += 20;
 							if(pLoopPlot->getResourceType(ePlotTeam) != NO_RESOURCE)  // we like nuking our their resources
 							{
-								iThisCityValue += 100;
+								iTargetValue += 100;
 							}
 						}
 					}
 				}
 				else if (ePlotOwner != NO_PLAYER) // this will trigger a war
 				{
-					iThisCityValue -= 10000;
+					iTargetValue -= 10000;
+				}
+
+				CvCity* pBlastCity = pLoopPlot->getPlotCity();
+				if (pBlastCity)
+				{
+					if (pBlastCity->getOriginalOwner() == m_eOwner)
+					{
+						iTargetValue -= 10000;
+					}
+					else if (pBlastCity->getOwner() == m_eEnemy && !pBlastCity->isInDangerOfFalling())
+					{
+						bEnemyCityHit = true;
+						int iCityValue = pBlastCity->getEconomicValue(enemyPlayer.GetID()) + pBlastCity->GetMaxHitPoints() - pBlastCity->getDamage();
+						iCityValue *= max(25, pBlastCity->getNukeModifier() + 100);
+						iCityValue /= 100;
+						if (pLoopUnit->GetNukeDamageLevel() > 1)
+							iCityValue = iCityValue * 3 / 2;
+						if (pBlastCity->IsNukeKillable(pLoopUnit->GetNukeDamageLevel()))
+							iCityValue += 1000;
+						if (pBlastCity->isCapital())
+							iCityValue *= 2;
+						iTargetValue += iCityValue;
+					}
+					else if (pBlastCity->getOwner() != m_eEnemy)
+					{
+						iTargetValue -= 10000;
+					}
 				}
 	
 				// will we hit any units here?
@@ -2819,54 +2860,67 @@ CvPlot* CvAIOperationNukeAttack::FindBestTarget(CvPlot** ppMuster) const
 						//Let's not nuke our own units.
 						if(eUnitOwner == m_eOwner)
 						{
-							iThisCityValue -= 200;
+							iTargetValue -= 500;
 						}
 						// visibility check for enemies
 						else if(ourTeam.isAtWar(eUnitTeam) && pLoopPlot->isVisible(eTeam))
 						{
-							iThisCityValue += 200;
+							iEnemyUnitsHit++;
+							iTargetValue += 200 + min(300, pInnerLoopUnit->GetPower() / 20);
 						}
 						else if (eUnitOwner != NO_PLAYER && GET_PLAYER(eUnitOwner).isMajorCiv()) // this will trigger a war
 						{
 							if(GET_PLAYER(m_eOwner).GetDiplomacyAI()->GetCivApproach(eUnitOwner) == CIV_APPROACH_WAR)
 							{
-								iThisCityValue += 500;
+								iTargetValue += 500;
 							}
 							else if(GET_PLAYER(m_eOwner).GetDiplomacyAI()->GetCivApproach(eUnitOwner) == CIV_APPROACH_HOSTILE)
 							{
-								iThisCityValue += 200;
+								iTargetValue += 200;
 							}
 							else
 							{
-								iThisCityValue -= 10000;
+								iTargetValue -= 10000;
 							}
 						}
 					}
 				}
 			}
 			
-			if (iThisCityValue <= 0)
+			// Do not expend a strategic weapon on an isolated unit. Formations
+			// become progressively more attractive through the per-unit score.
+			if (!bEnemyCityHit && iEnemyUnitsHit < 3)
 				continue;
 
-			iThisCityValue += pLoopCity->getEconomicValue(enemyPlayer.GetID()) + pLoopCity->GetMaxHitPoints() - pLoopCity->getDamage();
+			CvCity* pTargetCity = pTargetPlot->getPlotCity();
+			if (pTargetCity)
+			{
+				// De-emphasise cities in zones we are already winning conventionally.
+				CvTacticalDominanceZone* pLandZone = ownerPlayer.GetTacticalAI()->GetTacticalAnalysisMap()->GetZoneByCity(pTargetCity, false);
+				CvTacticalDominanceZone* pWaterZone = ownerPlayer.GetTacticalAI()->GetTacticalAnalysisMap()->GetZoneByCity(pTargetCity, true);
+				if (pLandZone && pLandZone->GetOverallDominanceFlag() == TACTICAL_DOMINANCE_FRIENDLY)
+					iTargetValue /= 2;
+				if (pWaterZone && pWaterZone->GetOverallDominanceFlag() == TACTICAL_DOMINANCE_FRIENDLY)
+					iTargetValue /= 2;
+			}
 
-			// if this is the capital
-			if(pLoopCity->isCapital())
-				iThisCityValue *= 2;
+			// Atomic Bombs can be destroyed by interception; Nuclear Missiles are
+			// merely reduced to Atomic Bomb strength, so discount them less.
+			CvCity* pInterceptor = pTargetPlot->GetNukeInterceptor(m_eOwner);
+			if (pInterceptor)
+			{
+				int iInterceptChance = range(pInterceptor->getNukeInterceptionChance(), 0, 100);
+				if (pLoopUnit->GetNukeDamageLevel() <= 1)
+					iTargetValue = iTargetValue * (100 - iInterceptChance) / 100;
+				else
+					iTargetValue = iTargetValue * (100 - iInterceptChance / 3) / 100;
+			}
 
-			//de-emphasise if we're winning anyway
-			CvTacticalDominanceZone* pLandZone = ownerPlayer.GetTacticalAI()->GetTacticalAnalysisMap()->GetZoneByCity(pLoopCity, false);
-			CvTacticalDominanceZone* pWaterZone = ownerPlayer.GetTacticalAI()->GetTacticalAnalysisMap()->GetZoneByCity(pLoopCity, true);
-			if (pLandZone && pLandZone->GetOverallDominanceFlag() == TACTICAL_DOMINANCE_FRIENDLY)
-				iThisCityValue /= 2;
-			if (pWaterZone && pWaterZone->GetOverallDominanceFlag() == TACTICAL_DOMINANCE_FRIENDLY)
-				iThisCityValue /= 2;
-
-			if(iThisCityValue > iBestCity)
+			if(iTargetValue > iBestTarget)
 			{
 				pBestUnit = pLoopUnit;
-				pBestCity = pLoopCity;
-				iBestCity = iThisCityValue;
+				pBestTarget = pTargetPlot;
+				iBestTarget = iTargetValue;
 			}
 		}
 	}
@@ -2874,16 +2928,33 @@ CvPlot* CvAIOperationNukeAttack::FindBestTarget(CvPlot** ppMuster) const
 	if (ppMuster)
 		*ppMuster = pBestUnit ? pBestUnit->plot() : NULL;
 
-	return pBestCity ? pBestCity->plot() : NULL;
+	return pBestTarget;
 }
 
-AIOperationAbortReason CvAIOperationNukeAttack::VerifyOrAdjustTarget(CvArmyAI* /*pArmy*/)
+AIOperationAbortReason CvAIOperationNukeAttack::VerifyOrAdjustTarget(CvArmyAI* pArmy)
 {
-	// See if our target is still owned by our enemy
-	if(GetTargetPlot()->getOwner() != m_eEnemy)
-		return AI_ABORT_TARGET_ALREADY_CAPTURED;
+	CvPlot* pTargetPlot = GetTargetPlot();
+	if (!pTargetPlot)
+		return AI_ABORT_TARGET_NOT_VALID;
 
-	return NO_ABORT_REASON;
+	CvUnit* pNuke = pArmy ? pArmy->GetFirstUnit() : NULL;
+	int iBlastRadius = getNuclearBlastRadius(pNuke ? pNuke->GetNukeDamageLevel() : 2);
+	for (int i = 0; i < RING_PLOTS[iBlastRadius]; i++)
+	{
+		CvPlot* pLoopPlot = iterateRingPlots(pTargetPlot, i);
+		if (!pLoopPlot)
+			continue;
+		if (pLoopPlot->isCity() && pLoopPlot->getPlotCity()->getOwner() == m_eEnemy)
+			return NO_ABORT_REASON;
+		for (const IDInfo* pUnitNode = pLoopPlot->headUnitNode(); pUnitNode != NULL; pUnitNode = pLoopPlot->nextUnitNode(pUnitNode))
+		{
+			CvUnit* pLoopUnit = ::GetPlayerUnit(*pUnitNode);
+			if (pLoopUnit && pLoopUnit->getOwner() == m_eEnemy)
+				return NO_ABORT_REASON;
+		}
+	}
+
+	return AI_ABORT_TARGET_NOT_VALID;
 }
 
 /// Find a unit from our reserves that could serve in this operation

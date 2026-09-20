@@ -1143,7 +1143,7 @@
     <File md5="7124A62C8FCD0B55705D8C252605477E" import="0">Database Changes/AI/ProjectFlavorChanges.sql</File>
     <File md5="602B461B5228346EEA274B1170B9B410" import="0">Database Changes/AI/StrategyChanges.sql</File>
     <File md5="3B44A9ADAA9D2E4C1B667FF4F0A4205B" import="0">Database Changes/AI/StrategyFlavorSweeps.sql</File>
-    <File md5="B769097180B081945E84F1DD46179809" import="0">Database Changes/AI/TechFlavorSweeps.sql</File>
+    <File md5="964AE425B6556AC008E033174BAC1FF0" import="0">Database Changes/AI/TechFlavorSweeps.sql</File>
     <File md5="337DD12FFC11972B828E052F47B02628" import="0">Database Changes/AI/UnitFlavorSweeps.sql</File>
     <File md5="9967F7AE00D1A80DF9F3CAE30BD648F3" import="0">Database Changes/Art/ImprovementArtChanges.sql</File>
     <File md5="4D64F6FB7DB689A36908292FCDBDC8CC" import="0">Database Changes/Art/NewIcons.xml</File>
@@ -1163,7 +1163,7 @@
     <File md5="41D51B1D68B8200B2B6C1E530A1A0636" import="0">Database Changes/Beliefs/ReformationChanges.sql</File>
     <File md5="D2DC1C33418B2C854337D6661E786B55" import="0">Database Changes/Beliefs/TooltipSweeps.sql</File>
     <File md5="044A57B02AC7076B0E8C07B084B2C66D" import="0">Database Changes/City/NewGreatWorks.xml</File>
-    <File md5="2CB2470104078F032409CD57D716226B" import="0">Database Changes/City/Buildings/BuildingChanges.sql</File>
+    <File md5="7DEDA07FC3F09E5B7962381E6606D455" import="0">Database Changes/City/Buildings/BuildingChanges.sql</File>
     <File md5="37E6546FFE984A65D80A7A3E85738BDD" import="0">Database Changes/City/Buildings/BuildingChanges2.sql</File>
     <File md5="9B10B2F5FFCB495E3648C7197A43F8D3" import="0">Database Changes/City/Buildings/BuildingCostSweeps.sql</File>
     <File md5="DF578A910BE1F7805C22ABA631BBE9F9" import="0">Database Changes/City/Buildings/BuildingSweeps.sql</File>
@@ -1266,7 +1266,7 @@
     <File md5="2D42E990457416F8137E88B754C788DE" import="0">Database Changes/Text/en_US/Beliefs/BeliefTextChanges.sql</File>
     <File md5="4F7C710703C9A7AEAF835ECCE1075FAD" import="0">Database Changes/Text/en_US/Beliefs/NewBeliefText.xml</File>
     <File md5="AA64216AE091FCB37C934575BE8D08C6" import="0">Database Changes/Text/en_US/City/PreBuildingTextChanges.sql</File>
-    <File md5="E1FDB322E053D284711350043CB058AA" import="0">Database Changes/Text/en_US/City/BuildingTextChanges.sql</File>
+    <File md5="9060E7473515CAA466C014797A0169EA" import="0">Database Changes/Text/en_US/City/BuildingTextChanges.sql</File>
     <File md5="016A12986E64507253B5CE5202A624FC" import="0">Database Changes/Text/en_US/City/NewBuildingText.xml</File>
     <File md5="9ABA8ABD3DABC418751EE479C1EB43B5" import="0">Database Changes/Text/en_US/City/NewGreatWorkText.xml</File>
     <File md5="0FB16728782FC50FBCCCD35A4908B759" import="0">Database Changes/Text/en_US/City/NewProcessText.xml</File>
@@ -1290,7 +1290,7 @@
     <File md5="176DCF60BE27FF018192A5F83B461E22" import="0">Database Changes/Text/en_US/Policies/NewPolicyText.xml</File>
     <File md5="72F34A409DA69AE1A2D7D6757932855B" import="0">Database Changes/Text/en_US/Policies/PolicyTextChanges.sql</File>
     <File md5="1014DA2D499FEB7220ABB967FF57ABAB" import="0">Database Changes/Text/en_US/Tech/NewTechText.xml</File>
-    <File md5="128D729700548362CF38EE0678399279" import="0">Database Changes/Text/en_US/Tech/TechTextChanges.sql</File>
+    <File md5="848F73C37B03CD36F1385C21D0F74BC0" import="0">Database Changes/Text/en_US/Tech/TechTextChanges.sql</File>
     <File md5="E5CB0AB92FAA1B2128EE557C30451B66" import="0">Database Changes/Text/en_US/UI/InterfaceModeTextChanges.sql</File>
     <File md5="B5C60FD5DF02295B68C1FEE0052EFD88" import="0">Database Changes/Text/en_US/UI/NewUIText.sql</File>
     <File md5="227D280419D91D316E98BED6DF6C48C7" import="0">Database Changes/Text/en_US/UI/NewUIText.xml</File>
@@ -1299,9 +1299,9 @@
     <File md5="0F7FA7A5B4A7208E6D443ADB8E3C1D5D" import="0">Database Changes/Text/en_US/UnitPromotions/PromotionTextChanges.sql</File>
     <File md5="DDA7CA65AFBAC78647BE27D28C01203E" import="0">Database Changes/Text/en_US/Units/PreUnitTextChanges.sql</File>
     <File md5="AF719FC045F45D377CCB5C09EBC6AEED" import="0">Database Changes/Text/en_US/Units/MissionTextChanges.sql</File>
-    <File md5="1833808BD4854A65C0D083DF8475BC54" import="0">Database Changes/Text/en_US/Units/NewMissionText.xml</File>
+    <File md5="A04F506807D852F925D1AD5901AF76C7" import="0">Database Changes/Text/en_US/Units/NewMissionText.xml</File>
     <File md5="D2EFE53DFE4412953E6A1B9F8C72DFD6" import="0">Database Changes/Text/en_US/Units/NewUnitText.xml</File>
-    <File md5="7F6897296013D2AEFC1246A55590B077" import="0">Database Changes/Text/en_US/Units/UnitTextChanges.sql</File>
+    <File md5="FDA526CF32D8FF8DF170CE4785F14ED4" import="0">Database Changes/Text/en_US/Units/UnitTextChanges.sql</File>
     <File md5="A257CBAE5C12FB43054F8FAAE36B384B" import="0">Database Changes/Text/en_US/WorldCongress/NewProjectText.xml</File>
     <File md5="D94CF49040D777C987C655EC7EA34AFC" import="0">Database Changes/Text/en_US/WorldCongress/NewResolutionText.xml</File>
     <File md5="1DB9390906CDF9F5B075CB6BE4BD6167" import="0">Database Changes/Text/en_US/WorldCongress/ProjectTextChanges.sql</File>
@@ -1325,15 +1325,15 @@
     <File md5="8162D95F0D760FB1BE03C2A2F5FCEC97" import="0">Database Changes/Units/BarbarianUnitChanges.sql</File>
     <File md5="2CA8A9501CD13590CDCDE70816879094" import="0">Database Changes/Units/CityStateUnitChanges.sql</File>
     <File md5="704B9F628BECBE2C57479EA10B1823D7" import="0">Database Changes/Units/NewGreatPeople.xml</File>
-    <File md5="E03E45F0374989BFBC68E66D668634C5" import="0">Database Changes/Units/NewMissions.xml</File>
+    <File md5="CE499773066E43063750E9FA98C61C12" import="0">Database Changes/Units/NewMissions.xml</File>
     <File md5="54C5AE1A26889A12C4F8EEADBE31DA37" import="0">Database Changes/Units/NewUnitFormations.xml</File>
     <File md5="59C7C8AEA699D3B8EB2A23DAF151D99B" import="0">Database Changes/Units/NewUnits.xml</File>
     <File md5="92229C5ACAA6013A3CF7D150F17E0020" import="0">Database Changes/Units/PolicyUnitChanges.sql</File>
     <File md5="C3786E076D5E131E5DFE1AD56F59ABF0" import="0">Database Changes/Units/PreUnitChanges.sql</File>
     <File md5="C62B5CFA10CC761F0005EAA27C0380B5" import="0">Database Changes/Units/UnitAIChanges.sql</File>
-    <File md5="74D847CA45A12FA512B04BAFA6484AE1" import="0">Database Changes/Units/UnitChanges.sql</File>
+    <File md5="FAA566A29DCFC6B27EDE0D59A0FE766D" import="0">Database Changes/Units/UnitChanges.sql</File>
     <File md5="29172E74A4062AE0B417B138E36C62A1" import="0">Database Changes/Units/UnitChanges2.sql</File>
-    <File md5="047951A003CF172F38D858EEC308EE38" import="0">Database Changes/Units/UnitCostSweeps.sql</File>
+    <File md5="3C2909716517F82589249271A81227C8" import="0">Database Changes/Units/UnitCostSweeps.sql</File>
     <File md5="BC0B978618FCBB7B0F3220100551BA40" import="0">Database Changes/Units/UnitStatChanges.sql</File>
     <File md5="B749545562014603F01E01BB68AD661A" import="0">Database Changes/Units/UnitSweeps.sql</File>
     <File md5="3C54AAAFC2EAE4978FB82FBF86D7E689" import="0">Database Changes/WorldCongress/CongressChanges.sql</File>

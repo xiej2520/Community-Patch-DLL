@@ -471,6 +471,7 @@ int CvBuildingProductionAI::CheckBuildingBuildSanity(BuildingTypes eBuilding, in
 	///Resources check
 	int iLuxuries = 0;
 	static ResourceTypes eAluminum = (ResourceTypes)GC.getInfoTypeForString("RESOURCE_ALUMINUM", true);
+	static ResourceTypes eUranium = (ResourceTypes)GC.getInfoTypeForString("RESOURCE_URANIUM", true);
 	for(int iResourceLoop = 0; iResourceLoop < GC.getNumResourceInfos(); iResourceLoop++)
 	{
 		const ResourceTypes eResource = static_cast<ResourceTypes>(iResourceLoop);
@@ -505,6 +506,19 @@ int CvBuildingProductionAI::CheckBuildingBuildSanity(BuildingTypes eBuilding, in
 						return SR_STRATEGY;
 					}
 				}
+			}
+
+			// Do not consume Uranium needed for the player's desired nuclear
+			// stockpile. This primarily keeps Nuclear Plants from crowding out
+			// weapons when the empire has only a few deposits.
+			if (eResource == eUranium && pkBuildingInfo->GetResourceQuantityRequirement(eResource) > 0)
+			{
+				int iDesiredNukes = kPlayer.GetMilitaryAI()->GetRecommendedNukeStockpile();
+				int iNukesAndQueued = kPlayer.GetNumUnitsWithUnitAI(UNITAI_ICBM, true, true);
+				int iNukesNeeded = max(0, iDesiredNukes - iNukesAndQueued);
+				int iUraniumAfterBuild = kPlayer.getNumResourceAvailable(eResource, false) - pkBuildingInfo->GetResourceQuantityRequirement(eResource);
+				if (iNukesNeeded > 0 && iUraniumAfterBuild < iNukesNeeded)
+					return SR_STRATEGY;
 			}
 
 			if(pkBuildingInfo->GetResourceQuantity(eResource) > 0)

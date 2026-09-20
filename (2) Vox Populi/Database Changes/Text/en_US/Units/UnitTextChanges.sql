@@ -59,12 +59,12 @@ WHERE Tag = 'TXT_KEY_UNIT_GUIDED_MISSILE_STRATEGY';
 
 -- Atomic Bomb
 UPDATE Language_en_US
-SET Text = 'An Atomic Bomb is an extremely powerful unit. The Atomic Bomb can be based in a player-owned city or aboard a carrier. It can move from base to base or attack a target within its range of 6 tiles. When it detonates, an Atomic Bomb will damage or possibly destroy units, and cities will be severely damaged, within its blast radius of 2 tiles. It is automatically destroyed when it attacks. See the rules on Nuclear Weapons for more details.'
+SET Text = 'An Atomic Bomb is an extremely powerful unit. The Atomic Bomb can be based in a player-owned city or aboard a carrier. It can move from base to base or attack a target within its range of 6 tiles, or 16 tiles after researching Advanced Ballistics. When it detonates, an Atomic Bomb will damage or possibly destroy units, and severely damage or destroy small cities, within its blast radius of 1 tile. It is automatically destroyed when it attacks. See the rules on Nuclear Weapons for more details.'
 WHERE Tag = 'TXT_KEY_UNIT_ATOMIC_BOMB_STRATEGY';
 
 -- Nuclear Missile
 UPDATE Language_en_US
-SET Text = 'The Nuclear Missile is an upgraded, more powerful Atomic Bomb. The Nuclear Missile can be based in any city you own or aboard a Nuclear Submarine or Missile Cruiser. It can move from base to base or attack a target within its range of 24 tiles. When it detonates, a Nuclear Missile will damage (and possibly destroy) cities and destroy all units within its blast radius of 2 tiles. It is automatically destroyed when it attacks. See the rules on Nuclear Weapons for more details.'
+SET Text = 'The Nuclear Missile is an upgraded, more powerful Atomic Bomb. The Nuclear Missile can be based in any city you own or aboard a Nuclear Submarine or Missile Cruiser. It can move from base to base or attack a target within its range of 24 tiles. When it detonates, a Nuclear Missile will damage (and possibly destroy) cities, destroy units on the impact plot, and deal 50-108 damage to other units within its blast radius of 2 tiles. It is automatically destroyed when it attacks. See the rules on Nuclear Weapons for more details.'
 WHERE Tag = 'TXT_KEY_UNIT_NUCLEAR_MISSILE_STRATEGY';
 
 UPDATE Language_en_US

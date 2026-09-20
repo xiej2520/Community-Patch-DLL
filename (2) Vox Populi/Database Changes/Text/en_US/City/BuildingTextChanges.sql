@@ -177,7 +177,7 @@ SET Text = 'Strategic Defense System'
 WHERE Tag = 'TXT_KEY_BUILDING_BOMB_SHELTER';
 
 UPDATE Language_en_US
-SET Text = 'Strategic Defense Systems have a 50% chance to detonate nuclear weapons early, which destroys Atomic Bombs outright and makes Nuclear Missiles only as effective as Atomic Bombs. They also reduce population loss from a nuclear attack on this City by 75% if a missile does strike, and deal 10 Damage to Air Units which strike this City. Duck and Cover!'
+SET Text = 'Strategic Defense Systems have a 50% chance to detonate nuclear weapons early, which destroys Atomic Bombs outright and makes Nuclear Missiles only as effective as Atomic Bombs. They also reduce nuclear unit damage and population loss from an attack on this City by 40% if a missile does strike, and deal 10 Damage to Air Units which strike this City. Duck and Cover!'
 WHERE Tag = 'TXT_KEY_BUILDING_BOMB_SHELTER_STRATEGY';
 
 UPDATE Language_en_US

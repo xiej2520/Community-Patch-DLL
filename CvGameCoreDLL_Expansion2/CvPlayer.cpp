@@ -32828,10 +32828,10 @@ int CvPlayer::calculateNuclearMight(PlayerTypes ePlayer, bool bComputeShelterNum
 		if (iNukeDamageLevel < 1)
 			continue;
 
-		int iBlastMultiplier = RING_PLOTS[/*2*/ range(GD_INT_GET(NUKE_BLAST_RADIUS), 1, 5)] - 1;
+		int iBlastMultiplier = RING_PLOTS[getNuclearBlastRadius(iNukeDamageLevel)] - 1;
 
 		// Assume the nuke destroys one land unit and four air units on the city plot
-		// Reduced by 75% with a Bomb Shelter
+		// Reduced by the Bomb Shelter's nuke modifier
 		int iBasePower = iHighestLandOrSeaPower * 3 + iHighestAirPower * 12;
 		if (iBombShelterPercent != 0 && iNukeModifier != 0)
 		{
@@ -32839,15 +32839,17 @@ int CvPlayer::calculateNuclearMight(PlayerTypes ePlayer, bool bComputeShelterNum
 			iBasePower /= 100;
 		}
 
-		// Atomic Bombs deal ~70 average damage to units in the blast radius, so add 2x the combat strength of the strongest unit, multiplied by the blast radius
-		// Nuclear Missiles destroy units in the blast radius, so add 3x the combat strength of the strongest unit, multiplied by the blast radius
+		// Atomic Bombs deal ~70 average damage to units in the blast radius, so add 2x the combat strength of the strongest unit, multiplied by the blast radius.
+		// Nuclear Missiles deal 50-108 damage to units away from the impact plot, so value their larger blast radius more heavily.
 		// Not all tiles will be occupied in practice, but that's okay - the total power serves as a rough approximation of the strength versus cities as well - nukes are strong!
 		int iBlastPower = iNukeDamageLevel == 1 ? iHighestLandOrSeaPower * iBlastMultiplier * 2 : iHighestLandOrSeaPower * iBlastMultiplier * 3;
 
 		// Factor in Bomb Shelters in this approximation
-		// Nuke Damage Level 1: Reduce total strength by 50% (50% chance of destroying the nuke outright), plus 17% (multiplicative) to account for the pop loss reduction
-		// Nuke Damage Level 2: Reduce strength of the BLAST by 17% (50% chance of downgrading the nuke to Level 1, which inflicts 16.7% less damage on avg)
-		// For Level 2, also reduce total strength by another 17% (multiplicative) to account for the pop loss reduction
+		// Nuke Damage Level 1: Reduce total strength by the interception chance
+		// (50% chance of destroying the nuke outright), plus a factor for the
+		// population-loss reduction.
+		// Nuke Damage Level 2: Reduce blast strength for the chance of downgrading
+		// the nuke to Level 1, then apply the population-loss reduction factor.
 		int iTotalPower = 0;
 		if (iBombShelterPercent != 0)
 		{

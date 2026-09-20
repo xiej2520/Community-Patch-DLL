@@ -439,6 +439,20 @@ int CvUnitProductionAI::CheckUnitBuildSanity(UnitTypes eUnit, bool bForOperation
 				//if we have a lot of the resource, we should spend it ... the units are usually good
 				iBonus += max(40, (kPlayer.getNumResourceAvailable(eNeededResource, false) - pkUnitEntry->GetResourceQuantityRequirement(eNeededResource)) * 40);
 			}
+
+			// Preserve enough Uranium to reach our desired nuclear deterrent before
+			// spending it on another Giant Death Robot.
+			static ResourceTypes eUraniumResource = (ResourceTypes)GC.getInfoTypeForString("RESOURCE_URANIUM", true);
+			static UnitClassTypes eGiantDeathRobotClass = (UnitClassTypes)GC.getInfoTypeForString("UNITCLASS_MECH", true);
+			if (pkUnitEntry->GetUnitClassType() == eGiantDeathRobotClass && pkUnitEntry->GetResourceQuantityRequirement(eUraniumResource) > 0)
+			{
+				int iDesiredNukes = kPlayer.GetMilitaryAI()->GetRecommendedNukeStockpile();
+				int iNukesAndQueued = kPlayer.GetNumUnitsWithUnitAI(UNITAI_ICBM, true, true);
+				int iNukesNeeded = max(0, iDesiredNukes - iNukesAndQueued);
+				int iUraniumAfterBuild = kPlayer.getNumResourceAvailable(eUraniumResource, false) - pkUnitEntry->GetResourceQuantityRequirement(eUraniumResource);
+				if (iNukesNeeded > 0 && iUraniumAfterBuild < iNukesNeeded)
+					return SR_STRATEGY;
+			}
 		}
 
 		///////////////
@@ -495,7 +509,21 @@ int CvUnitProductionAI::CheckUnitBuildSanity(UnitTypes eUnit, bool bForOperation
 			//Nukes!!!
 			if(pkUnitEntry->GetNukeDamageLevel() > 0)
 			{
-				iBonus += 100;
+				int iDesiredNukes = kPlayer.GetMilitaryAI()->GetRecommendedNukeStockpile();
+				int iNukesAndQueued = kPlayer.GetNumUnitsWithUnitAI(UNITAI_ICBM, true, true);
+				int iNukesNeeded = max(0, iDesiredNukes - iNukesAndQueued);
+				int iFlavorNuke = kPlayer.GetFlavorManager()->GetPersonalityIndividualFlavor((FlavorTypes)GC.getInfoTypeForString("FLAVOR_NUKE"));
+
+				// Nuclear weapons must win the production comparison while the
+				// uranium reserve is below its target. The damage level gives the
+				// stronger Nuclear Missile a modest additional advantage.
+				int iNukePriority = 250 + (iFlavorNuke * 35);
+				if (iNukesNeeded > 0)
+					iNukePriority += 600 + (iNukesNeeded * 500);
+				if (bAtWar && iNukesNeeded > 0)
+					iNukePriority += 300;
+				iNukePriority += pkUnitEntry->GetNukeDamageLevel() * 100;
+				iBonus += iNukePriority;
 			}
 			//Cruise Missiles? Only if we don't have any nukes lying around...
 			else if(pkUnitEntry->GetRangedCombat() > 0 && kPlayer.getNumNukeUnits() > 0)

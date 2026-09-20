@@ -109,10 +109,10 @@ UPDATE Language_en_US
 SET Text = 'Allow you to build the [COLOR_POSITIVE_TEXT]Apollo Program[ENDCOLOR], a project necessary to win a [COLOR_POSITIVE_TEXT]Science Victory[ENDCOLOR].'
 WHERE Tag = 'TXT_KEY_TECH_SATELLITES_HELP';
 
--- Lasers
+-- Advanced Ballistics
 UPDATE Language_en_US
 SET Text = 'Allows you to build the [COLOR_POSITIVE_TEXT]Nuclear Missile[ENDCOLOR], a frightening weapon that requires [ICON_RES_URANIUM] Uranium, and is capable of destroying units and cities.'
-WHERE Tag = 'TXT_KEY_TECH_LASERS_HELP';
+WHERE Tag = 'TXT_KEY_TECH_ADVANCED_BALLISTICS_HELP';
 
 -- Globalization
 UPDATE Language_en_US

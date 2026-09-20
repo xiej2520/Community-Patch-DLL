@@ -385,7 +385,7 @@ VALUES
 	('TECH_COMPUTERS', 'FLAVOR_CULTURE', 5),
 	('TECH_COMPUTERS', 'FLAVOR_WONDER', 5),
 
-	('TECH_NUCLEAR_FISSION', 'FLAVOR_NUKE', 30), -- Units: Fleet Destroyer, Battleship, A-Bomb, Buildings: Str.Defense, Yields: Academy +3S
+	('TECH_NUCLEAR_FISSION', 'FLAVOR_NUKE', 30), -- Units: Fleet Destroyer, Battleship, A-Bomb, Yields: Academy +3S
 	('TECH_NUCLEAR_FISSION', 'FLAVOR_NAVAL', 30),
 	('TECH_NUCLEAR_FISSION', 'FLAVOR_CITY_DEFENSE', 5),
 
@@ -409,12 +409,13 @@ VALUES
 	('TECH_SATELLITES', 'FLAVOR_WONDER', 10),
 	('TECH_SATELLITES', 'FLAVOR_SPACESHIP', 75),
 
-	('TECH_ADVANCED_BALLISTICS', 'FLAVOR_NAVAL', 15), -- Units: ModernArmor, RocketART, SAM, Guided Missile
+	('TECH_ADVANCED_BALLISTICS', 'FLAVOR_NAVAL', 15), -- Units: ModernArmor, RocketART, SAM, Guided Missile, Nuke
 	('TECH_ADVANCED_BALLISTICS', 'FLAVOR_OFFENSE', 30),
 	('TECH_ADVANCED_BALLISTICS', 'FLAVOR_RANGED', 10),
 	('TECH_ADVANCED_BALLISTICS', 'FLAVOR_MOBILE', 10),
 	('TECH_ADVANCED_BALLISTICS', 'FLAVOR_ANTIAIR', 10),
 	('TECH_ADVANCED_BALLISTICS', 'FLAVOR_AIR', 10),
+	('TECH_ADVANCED_BALLISTICS', 'FLAVOR_NUKE', 30),
 
 	('TECH_MOBILE_TACTICS', 'FLAVOR_OFFENSE', 10), -- Units: Helicopter, Mech.Inf, Bazooka, Ability: FasteronRails
 	('TECH_MOBILE_TACTICS', 'FLAVOR_DEFENSE', 10),
@@ -434,8 +435,7 @@ VALUES
 	('TECH_INTERNET', 'FLAVOR_CULTURE', 55), -- Wonders: Firewall, Ability: TourismBoost, Yields: Writers +2C, Merchants +3G, Servants +2C
 	('TECH_INTERNET', 'FLAVOR_GOLD', 15),
 
-	('TECH_LASERS', 'FLAVOR_OFFENSE', 10), -- Units: Missile Cruiser, Nuke, JetFighter, XCOM, Yields: Eng. +3P
-	('TECH_LASERS', 'FLAVOR_NUKE', 30),
+	('TECH_LASERS', 'FLAVOR_OFFENSE', 10), -- Units: Missile Cruiser, JetFighter, XCOM, Yields: Eng. +3P
 	('TECH_LASERS', 'FLAVOR_AIR', 15),
 	('TECH_LASERS', 'FLAVOR_NAVAL', 15),
 	('TECH_LASERS', 'FLAVOR_PRODUCTION', 15),
