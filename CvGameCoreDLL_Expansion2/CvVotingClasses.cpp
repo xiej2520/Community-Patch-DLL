@@ -3940,6 +3940,23 @@ int CvLeague::GetSpentVotesForMember(PlayerTypes ePlayer)
 	return iVotes;
 }
 
+int CvLeague::GetExtraVotesForMember(PlayerTypes ePlayer)
+{
+	Member* pMember = GetMember(ePlayer);
+	return pMember ? pMember->iExtraVotes : 0;
+}
+
+void CvLeague::SetExtraVotesForMember(PlayerTypes ePlayer, int iValue)
+{
+	Member* pMember = GetMember(ePlayer);
+	if (pMember == NULL)
+		return;
+
+	pMember->iExtraVotes = max(0, iValue);
+	pMember->m_startingVotesCacheTime = -1;
+	GC.GetEngineUserInterface()->setDirty(LeagueScreen_DIRTY_BIT, true);
+}
+
 int CvLeague::GetPotentialVotesForMember(PlayerTypes ePlayer, PlayerTypes eFromPlayer)
 {
 	if (GC.getGame().GetGameLeagues()->GetNumActiveLeagues() > 0)
@@ -4730,6 +4747,8 @@ void CvLeague::SetHostMember(PlayerTypes ePlayer)
 				if (ePlayer != GetHostMember())
 				{
 					m_eHost = ePlayer;
+					for (MemberList::iterator cacheIt = m_vMembers.begin(); cacheIt != m_vMembers.end(); ++cacheIt)
+						cacheIt->m_startingVotesCacheTime = -1;
 					it->bEverBeenHost = true;
 					UpdateName();
 				}
@@ -8360,14 +8379,18 @@ void CvLeague::AssignProposalPrivileges()
 	}
 	vpPossibleProposers.StableSortItems();
 
-	int iPrivileges = GetNumProposersPerSession();
+	// GetNumProposersPerSession() is capped by total league membership, which
+	// can include city-states.  Only major members can actually receive a
+	// proposal privilege, so cap the allocation by the eligible list as well.
+	int iPrivileges = MIN(GetNumProposersPerSession(), (int)vpPossibleProposers.size());
 
 	// Host gets one
 	PlayerTypes eHost = GetHostMember();
-	if (eHost != NO_PLAYER)
+	Member* pHost = (eHost != NO_PLAYER && CanEverPropose(eHost)) ? GetMember(eHost) : NULL;
+	if (pHost != NULL && iPrivileges > 0)
 	{
-		GetMember(eHost)->bMayPropose = true;
-		GetMember(eHost)->iProposals = /*1*/ GD_INT_GET(LEAGUE_MEMBER_PROPOSALS_BASE);
+		pHost->bMayPropose = true;
+		pHost->iProposals = /*1*/ GD_INT_GET(LEAGUE_MEMBER_PROPOSALS_BASE);
 		SetHostProposing(true);
 		iPrivileges--;
 	}

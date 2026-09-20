@@ -55,6 +55,8 @@ protected:
 	static int lCanVote(lua_State* L);
 	static int lGetRemainingVotesForMember(lua_State* L);
 	static int lGetSpentVotesForMember(lua_State* L);
+	static int lGetExtraVotesForMember(lua_State* L);
+	static int lSetExtraVotesForMember(lua_State* L);
 	static int lGetCoreVotesForMember(lua_State* L);
 	static int lCalculateStartingVotesForMember(lua_State* L);
 	static int lCanPropose(lua_State* L);
@@ -62,6 +64,8 @@ protected:
 
 	static int lIsHostMember(lua_State* L);
 	static int lGetHostMember(lua_State* L);
+	static int lSetHostMember(lua_State* L);
+	static int lSetTurnsUntilSession(lua_State* L);
 	static int lIsUnitedNations(lua_State* L);
 
 	LUAAPIEXTN(DoProposeEnact, void, eResolution, iPlayer, iChoice=-1);

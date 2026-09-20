@@ -59,6 +59,8 @@ void CvLuaLeague::PushMethods(lua_State* L, int t)
 	Method(CanVote);
 	Method(GetRemainingVotesForMember);
 	Method(GetSpentVotesForMember);
+	Method(GetExtraVotesForMember);
+	Method(SetExtraVotesForMember);
 	Method(GetCoreVotesForMember);
 	Method(CalculateStartingVotesForMember);
 	Method(CanPropose);
@@ -66,6 +68,8 @@ void CvLuaLeague::PushMethods(lua_State* L, int t)
 
 	Method(IsHostMember);
 	Method(GetHostMember);
+	Method(SetHostMember);
+	Method(SetTurnsUntilSession);
 	Method(IsUnitedNations);
 
 	Method(DoProposeEnact);
@@ -458,6 +462,28 @@ int CvLuaLeague::lGetSpentVotesForMember(lua_State* L)
 	return 1;
 }
 //------------------------------------------------------------------------------
+//int GetExtraVotesForMember(PlayerTypes ePlayer);
+int CvLuaLeague::lGetExtraVotesForMember(lua_State* L)
+{
+	CvLeague* pLeague = GetInstance(L);
+	const PlayerTypes ePlayer = (PlayerTypes) lua_tointeger(L, 2);
+
+	lua_pushinteger(L, pLeague->GetExtraVotesForMember(ePlayer));
+	return 1;
+}
+//------------------------------------------------------------------------------
+//void SetExtraVotesForMember(PlayerTypes ePlayer, int iValue);
+int CvLuaLeague::lSetExtraVotesForMember(lua_State* L)
+{
+	CvLeague* pLeague = GetInstance(L);
+	const PlayerTypes ePlayer = (PlayerTypes) lua_tointeger(L, 2);
+	const int iValue = lua_tointeger(L, 3);
+
+	if (pLeague->IsMember(ePlayer))
+		pLeague->SetExtraVotesForMember(ePlayer, iValue);
+	return 0;
+}
+//------------------------------------------------------------------------------
 //int GetCoreVotesForMember(PlayerTypes ePlayer);
 int CvLuaLeague::lGetCoreVotesForMember(lua_State* L)
 {
@@ -520,6 +546,32 @@ int CvLuaLeague::lGetHostMember(lua_State* L)
 	
 	const PlayerTypes eHost = pLeague->GetHostMember();
 	lua_pushinteger(L, (int)eHost);
+	return 1;
+}
+//------------------------------------------------------------------------------
+//bool SetHostMember(PlayerTypes ePlayer);
+int CvLuaLeague::lSetHostMember(lua_State* L)
+{
+	CvLeague* pLeague = GetInstance(L);
+	const PlayerTypes ePlayer = (PlayerTypes) lua_tointeger(L, 2);
+	const bool bValid = !pLeague->IsInSession() && pLeague->IsMember(ePlayer) && !GET_PLAYER(ePlayer).isMinorCiv();
+
+	if (bValid)
+		pLeague->SetHostMember(ePlayer);
+	lua_pushboolean(L, bValid);
+	return 1;
+}
+//------------------------------------------------------------------------------
+//bool SetTurnsUntilSession(int iTurns);
+int CvLuaLeague::lSetTurnsUntilSession(lua_State* L)
+{
+	CvLeague* pLeague = GetInstance(L);
+	const int iTurns = lua_tointeger(L, 2);
+	const bool bValid = !pLeague->IsInSession() && iTurns >= 0;
+
+	if (bValid)
+		pLeague->SetTurnsUntilSession(iTurns);
+	lua_pushboolean(L, bValid);
 	return 1;
 }
 //------------------------------------------------------------------------------

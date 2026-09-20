@@ -62,7 +62,7 @@
     <File md5="28A52DB9C98E03AAA9609E1478EC8D45" import="1">IGE_Loader.xml</File>
     <File md5="DECA8AFD71E82D42923836B0C0E4352D" import="1">IGE_Utils.lua</File>
     <File md5="A4074D5EBFD9F522FEE4C169B62B35F5" import="1">IGE_Window.lua</File>
-    <File md5="C6619B3596D301293C98E12111566DD5" import="1">IGE_Window.xml</File>
+    <File md5="823F4BE7BF73DE431105C598FA666AD2" import="1">IGE_Window.xml</File>
     <File md5="8539E1686278757E2C066188D2B1CCA7" import="1">Art/IgeBarbarian32.dds</File>
     <File md5="E046C18ED442E506BD81F44C00F01B26" import="1">Art/IgeBarbarian64.dds</File>
     <File md5="CBE1AB7BBC1EEA8AD0BB66555E55F05C" import="1">Art/IgeCheckmark.dds</File>
@@ -111,7 +111,7 @@
     <File md5="6B5865976523DD86BDF7A5BE476986B9" import="1">BulkUI/IGE_WonderPopup.xml</File>
     <File md5="98F9B8E63C3DF4BA292752C3427901D4" import="0">Localization/changes.txt</File>
     <File md5="C1E454A2257F2B7457573D4683A16E09" import="0">Localization/IGE_DE_DE.xml</File>
-    <File md5="C4FA03BE1283E365F6A5A4611821542F" import="0">Localization/IGE_EN_US.xml</File>
+    <File md5="AA4948832F5D6FE345A6F952A747EB5D" import="0">Localization/IGE_EN_US.xml</File>
     <File md5="356FB073D7D5312E0868D6792F1219BA" import="0">Localization/IGE_ES_ES.xml</File>
     <File md5="D1D8CBC992B39D96F5F85720F455F56B" import="0">Localization/IGE_FR_FR.xml</File>
     <File md5="EABDCB39CA82A919FF3EA0B100BB3883" import="0">Localization/IGE_IT_IT.xml</File>
@@ -126,6 +126,8 @@
     <File md5="3F38B74B9FC96D1C78DCE48500D7DDC0" import="1">Panels/IGE_PlayersPanel.xml</File>
     <File md5="456342A9A682DEE4052BB4DBE9447701" import="1">Panels/IGE_PoliciesPanel.lua</File>
     <File md5="15253BAF4CB0143986653F03DCB09D43" import="1">Panels/IGE_PoliciesPanel.xml</File>
+    <File md5="A8AE983A216F03186F688C94356B6B66" import="1">Panels/IGE_WorldCongressPanel.lua</File>
+    <File md5="899EF73413FDB6DEB3DB8B803740DA66" import="1">Panels/IGE_WorldCongressPanel.xml</File>
     <File md5="1AEDFE2D2A7B522103872993520FE9C5" import="1">Panels/IGE_TechsPanel.lua</File>
     <File md5="8183B5F8A31AADEFA4B4C3927797B1FA" import="1">Panels/IGE_TechsPanel.xml</File>
     <File md5="B73F71E8A86E08B561FB28E058A8AD1E" import="1">Panels/IGE_TerrainPanel.lua</File>

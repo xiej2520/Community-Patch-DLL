@@ -11528,6 +11528,11 @@ int CvLuaPlayer::lIsDoF(lua_State* L)
 {
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	PlayerTypes eWithPlayer = (PlayerTypes) lua_tointeger(L, 2);
+	if (!pkPlayer->isMajorCiv() || eWithPlayer < 0 || eWithPlayer >= MAX_MAJOR_CIVS)
+	{
+		lua_pushboolean(L, false);
+		return 1;
+	}
 
 	const bool bTooSoon = pkPlayer->GetDiplomacyAI()->IsDoFAccepted(eWithPlayer);
 
@@ -12266,6 +12271,9 @@ int CvLuaPlayer::lDoForceDoF(lua_State* L)
 {
 	CvPlayerAI* pkPlayer = GetInstance(L);
 	PlayerTypes eOtherPlayer = (PlayerTypes) lua_tointeger(L, 2);
+	if (!pkPlayer->isMajorCiv() || eOtherPlayer < 0 || eOtherPlayer >= MAX_MAJOR_CIVS ||
+		eOtherPlayer == pkPlayer->GetID() || !GET_PLAYER(eOtherPlayer).isAlive())
+		return 1;
 
 	// Can't do this while at war!
 	if (pkPlayer->IsAtWarWith(eOtherPlayer))

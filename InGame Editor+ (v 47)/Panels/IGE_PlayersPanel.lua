@@ -39,6 +39,7 @@ function OnInitialize()
 	{
 		{ text = L("TXT_KEY_IGE_MEET"),						filter = CanMeet,			handler = Meet,				none=L("TXT_KEY_IGE_MEET_NONE") },
 		{ text = L("TXT_KEY_IGE_FORM_TEAM"),				filter = CanFormTeam,		handler = FormTeam,			none=L("TXT_KEY_IGE_FORM_TEAM_NONE") },
+		{ text = L("TXT_KEY_IGE_DEFENSIVE_PACT"),			filter = CanDefensivePact,		handler = MakeDefensivePact,	none=L("TXT_KEY_IGE_DEFENSIVE_PACT_NONE") },
 		{ text = L("TXT_KEY_IGE_MAKE_PEACE"),				filter = CanMakePeace,		handler = MakePeace,		none=L("TXT_KEY_IGE_MAKE_PEACE_NONE") },
 		{ text = L("TXT_KEY_IGE_SIGN_DOF") ,				filter = CanMakeDoF,		handler = MakeDoF,			none=L("TXT_KEY_IGE_SIGN_DOF_NONE") },
 		{ text = L("TXT_KEY_IGE_MAX_MINOR_INFLUENCE"),		filter = CanAllyMinor,		handler = AllyMinor,		none=L("TXT_KEY_IGE_MAX_MINOR_INFLUENCE_NONE")},
@@ -189,6 +190,13 @@ LuaEvents.IGE_Update.Add(OnUpdate);
 --===============================================================================================
 -- DIPLOMATIC HANDLERS
 --===============================================================================================
+local function IsValidMajorPlayer(playerID)
+	return playerID ~= nil
+		and playerID >= 0
+		and playerID < GameDefines.MAX_MAJOR_CIVS
+		and Players[playerID]:IsAlive();
+end
+
 function PlayerClickHandler(handler, sourceID, targetID)
 	handler(sourceID, targetID);
 	OnUpdate();
@@ -224,8 +232,24 @@ end
 function CanFormTeam(sourceID, targetID)
 	if not Players[targetID]:IsAlive() then 
 		return false;
+	elseif Players[sourceID]:IsMinorCiv() or Players[targetID]:IsMinorCiv() then
+		return false;
 	elseif GetTeamID(sourceID) == GetTeamID(targetID) then
 		return true, false, L("TXT_KEY_IGE_ALREADY_IN_TEAM_ERROR") ;
+	else
+		return true, true;
+	end
+end
+
+function CanDefensivePact(sourceID, targetID)
+	if not IsValidMajorPlayer(sourceID) or not IsValidMajorPlayer(targetID) then
+		return false;
+	elseif GetTeamID(sourceID) == GetTeamID(targetID) then
+		return true, false, L("TXT_KEY_IGE_SAME_TEAM_ERROR");
+	elseif GetTeam(sourceID):IsAtWar(GetTeamID(targetID)) then
+		return true, false, L("TXT_KEY_IGE_ALREADY_AT_WAR_ERROR");
+	elseif Players[sourceID]:IsHasDefensivePactWithPlayer(targetID) then
+		return true, false, L("TXT_KEY_IGE_ALREADY_DEFENSIVE_PACT_ERROR");
 	else
 		return true, true;
 	end
@@ -242,9 +266,7 @@ function CanMakePeace(sourceID, targetID)
 end
 
 function CanMakeDoF(sourceID, targetID)
-	if not Players[targetID]:IsAlive() then 
-		return false;
-	elseif Players[targetID]:IsMinorCiv() then 
+	if not IsValidMajorPlayer(sourceID) or not IsValidMajorPlayer(targetID) then
 		return false;
 	elseif Players[sourceID]:IsDoF(targetID) then
 		return true, false, L("TXT_KEY_IGE_ALREADY_UNDER_DOF_ERROR");
@@ -340,7 +362,19 @@ function FormTeam(sourceID, targetID)
 		L("TXT_KEY_IGE_NOTIFY_ALLIANCE_SHORT"),L("TXT_KEY_IGE_NOTIFY_ALLIANCE_LONG") );
 end
 
+function MakeDefensivePact(sourceID, targetID)
+	if not IsValidMajorPlayer(sourceID) or not IsValidMajorPlayer(targetID) then
+		return;
+	end
+	Players[sourceID]:DoForceDefPact(targetID);
+	NotifyDiplo(sourceID, targetID, NotificationTypes.NOTIFICATION_PEACE_ACTIVE_PLAYER,
+		L("TXT_KEY_IGE_NOTIFY_DEFENSIVE_PACT_SHORT"), L("TXT_KEY_IGE_NOTIFY_DEFENSIVE_PACT_LONG"));
+end
+
 function MakeDoF(sourceID, targetID)
+	if not IsValidMajorPlayer(sourceID) or not IsValidMajorPlayer(targetID) then
+		return;
+	end
 	Players[sourceID]:DoForceDoF(targetID);
 	NotifyDiplo(sourceID, targetID, NotificationTypes.NOTIFICATION_PEACE_ACTIVE_PLAYER, 
 		L("TXT_KEY_IGE_NOTIFY_DOF_SHORT"), L("TXT_KEY_IGE_NOTIFY_DOF_LONG"));

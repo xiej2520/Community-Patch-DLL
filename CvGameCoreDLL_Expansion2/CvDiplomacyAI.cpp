@@ -4021,6 +4021,8 @@ void CvDiplomacyAI::SetDemandTargetPlayer(PlayerTypes ePlayer)
 /// Do we have a Declaration of Friendship with ePlayer?
 bool CvDiplomacyAI::IsDoFAccepted(PlayerTypes ePlayer) const
 {
+	if (ePlayer < 0 || ePlayer >= MAX_MAJOR_CIVS)
+		return false;
 	PRECONDITION(ePlayer >= 0 && ePlayer < MAX_MAJOR_CIVS, "Player index out of bounds");
 	return GetDoFAcceptedTurn(ePlayer) != -1;
 }
@@ -4028,6 +4030,8 @@ bool CvDiplomacyAI::IsDoFAccepted(PlayerTypes ePlayer) const
 /// We made a Declaration of Friendship with someone, handle everything that means
 void CvDiplomacyAI::SetDoFAccepted(PlayerTypes ePlayer, bool bValue)
 {
+	if (ePlayer < 0 || ePlayer >= MAX_MAJOR_CIVS)
+		return;
 	if (bValue != IsDoFAccepted(ePlayer))
 	{
 		// Someone made a DoF, send out notifications to everyone
