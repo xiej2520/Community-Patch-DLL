@@ -186,7 +186,9 @@ UPDATE Units SET PrereqTech = 'TECH_ADVANCED_BALLISTICS' WHERE Class = 'UNITCLAS
 UPDATE Units
 SET
 	PrereqTech = 'TECH_ROBOTICS',
-	DefaultUnitAI = 'UNITAI_FAST_ATTACK'
+	DefaultUnitAI = 'UNITAI_FAST_ATTACK',
+	SpecialCargo = 'SPECIALUNIT_MISSILE',
+	DomainCargo = 'DOMAIN_AIR'
 WHERE Class = 'UNITCLASS_MECH';
 
 ----------------------------------------------------------------------------
@@ -300,7 +302,12 @@ SET
 WHERE Class = 'UNITCLASS_ARTILLERY';
 
 -- Rocket Artillery
-UPDATE Units SET PrereqTech = 'TECH_ADVANCED_BALLISTICS' WHERE Class = 'UNITCLASS_ROCKET_ARTILLERY';
+UPDATE Units
+SET
+	PrereqTech = 'TECH_ADVANCED_BALLISTICS',
+	SpecialCargo = 'SPECIALUNIT_MISSILE',
+	DomainCargo = 'DOMAIN_AIR'
+WHERE Class = 'UNITCLASS_ROCKET_ARTILLERY';
 
 ----------------------------------------------------------------------------
 -- Recon

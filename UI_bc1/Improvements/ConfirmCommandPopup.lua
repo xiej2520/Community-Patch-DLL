@@ -18,7 +18,11 @@ PopupLayouts[ButtonPopupTypes.BUTTONPOPUP_CONFIRMCOMMAND] = function(popupInfo)
 	local buttonText = Locale.ConvertTextKey("TXT_KEY_POPUP_YES");
 	AddButton(buttonText, function()
 		-- Confirm action
-		Game.SelectionListGameNetMessage( GameMessageTypes.GAMEMESSAGE_DO_COMMAND, action.CommandType, action.CommandData, -1, 0, bAlt );
+		if action.Type == "MISSION_DETONATE_NUKE" then
+			Game.HandleAction( popupInfo.Data1 );
+		else
+			Game.SelectionListGameNetMessage( GameMessageTypes.GAMEMESSAGE_DO_COMMAND, action.CommandType, action.CommandData, -1, 0, bAlt );
+		end
 	end )
 
 	-- Initialize 'no' button.
@@ -39,4 +43,3 @@ PopupInputHandlers[ButtonPopupTypes.BUTTONPOPUP_CONFIRMCOMMAND] = function( uiMs
         end
     end
 end
-

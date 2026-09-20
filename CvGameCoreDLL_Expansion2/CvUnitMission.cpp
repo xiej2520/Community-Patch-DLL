@@ -44,6 +44,14 @@
 #define CUSTOM_MISSION_DONE             2
 #define CUSTOM_MISSION_ACTION_AND_DONE  3
 
+namespace
+{
+	MissionTypes GetDetonateNuclearMission()
+	{
+		return (MissionTypes)GC.getInfoTypeForString("MISSION_DETONATE_NUKE", true);
+	}
+}
+
 // ANY: CustomMissionPossible(iPlayer, iUnit, iMission, iData1, iData2, iFlags=0, iTurn=-1, iPlotX, iPlotY, bTestVisible)
 // ACC: CustomMissionStart(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) = CUSTOM_MISSION_ACTION
 // ACC: CustomMissionSetActivity(iPlayer, iUnit, iMission, iData1, iData2, iFlags, iTurn) = CUSTOM_MISSION_ACTION_AND_DONE
@@ -676,6 +684,24 @@ void CvUnitMission::ContinueMission(CvUnit* hUnit, int iSteps)
 				}
 			}
 
+			else if(kMissionData.eMissionType == GetDetonateNuclearMission())
+			{
+				// Cargo units can retain stale coordinates while their transport is moving.
+				// A self-detonation must use the transport's current plot, just like a
+				// normal attack launched from a carrier or missile vessel.
+				CvPlot* pDetonationPlot = hUnit->plot();
+				CvUnit* pTransportUnit = hUnit->getTransportUnit();
+				if(pTransportUnit != NULL && pTransportUnit->plot() != NULL)
+				{
+					pDetonationPlot = pTransportUnit->plot();
+				}
+
+				if(pDetonationPlot != NULL && CvUnitCombat::AttackNuclear(*hUnit, pDetonationPlot->getX(), pDetonationPlot->getY(), CvUnitCombat::ATTACK_OPTION_NONE, true, hUnit->GetNuclearDetonationDamageLevel()) != CvUnitCombat::ATTACK_ABORTED)
+				{
+					bDone = true;
+				}
+			}
+
 			else if(kMissionData.eMissionType == CvTypes::getMISSION_BUILD())
 			{
 				if(!hUnit->UnitBuild((BuildTypes)(kMissionData.iData1)))
@@ -1106,6 +1132,14 @@ bool CvUnitMission::CanStartMission(CvUnit* hUnit, int iMission, int iData1, int
 	else if(iMission == CvTypes::getMISSION_NUKE())
 	{
 		if(hUnit->canNukeAt(pPlot, iData1, iData2))
+		{
+			return true;
+		}
+	}
+	else if(iMission == GetDetonateNuclearMission())
+	{
+		if(hUnit->canDetonateNuclear() ||
+			(bTestVisible && hUnit->GetNuclearDetonationDamageLevel() > 0))
 		{
 			return true;
 		}
@@ -1543,6 +1577,15 @@ void CvUnitMission::StartMission(CvUnit* hUnit)
 			{
 				MissionData& kMissionData = *hUnit->HeadMissionData();
 				if(GC.getMap().plot(kMissionData.iData1, kMissionData.iData2) == NULL || !hUnit->canNukeAt(hUnit->plot(), kMissionData.iData1, kMissionData.iData2))
+				{
+					// Invalid, delete the mission
+					bDelete = true;
+				}
+			}
+
+			else if(pkQueueData->eMissionType == GetDetonateNuclearMission())
+			{
+				if(!hUnit->canDetonateNuclear())
 				{
 					// Invalid, delete the mission
 					bDelete = true;

@@ -795,7 +795,7 @@
     <File md5="09F48361B9384916FE92B558BF89584A" import="1">LUA/TechTree.lua</File>
     <File md5="6F466E73E0A73EC3C95ACFCADC826D81" import="1">LUA/TechTree.xml</File>
     <File md5="E0AE662C54885CF86420CB814091F04A" import="1">LUA/TopPanel.lua</File>
-    <File md5="1B7657384F730D1D73AD05D9F46CEEDF" import="1">LUA/UnitPanel.lua</File>
+    <File md5="775E1F28E63969AC766BEC6FF269C46D" import="1">LUA/UnitPanel.lua</File>
     <File md5="B3F04071E64112CAE79DBF97340A6A9A" import="1">LUA/Includes/CityStateStatusHelper.lua</File>
     <File md5="3EEC34EC93897595AABD4367C8B4B1A9" import="1">Mapscripts/Boreal.lua</File>
     <File md5="C94DD0DDF8E82E5B09B728BD7FCD951A" import="1">Mapscripts/Highlands.lua</File>

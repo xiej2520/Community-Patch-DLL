@@ -2,6 +2,20 @@
 <GameData>
 	<Missions>
 		<Row>
+			<Type>MISSION_DETONATE_NUKE</Type>
+			<Description>TXT_KEY_MISSION_DETONATE_NUKE</Description>
+			<Help>TXT_KEY_MISSION_DETONATE_NUKE_HELP</Help>
+			<DisabledHelp>TXT_KEY_MISSION_DETONATE_NUKE_DISABLED_HELP</DisabledHelp>
+			<OrderPriority>198</OrderPriority>
+			<Visible>true</Visible>
+			<Time>20</Time>
+			<Target>false</Target>
+			<Build>false</Build>
+			<Sound>false</Sound>
+			<IconIndex>16</IconIndex>
+			<IconAtlas>UNIT_ACTION_ATLAS</IconAtlas>
+		</Row>
+		<Row>
 			<Type>MISSION_FREE_LUXURY</Type>
 			<Description>TXT_KEY_MISSION_FREE_LUXURY</Description>
 			<Help>TXT_KEY_MISSION_FREE_LUXURY_HELP</Help>

@@ -962,6 +962,9 @@ local g_actionIconIndexAndAtlas = {
 
 	[ActionSubTypes.ACTIONSUBTYPE_MISSION] = function(action)
 		local info = GameInfo.Missions[action.Type]
+		if action.Type == "MISSION_DETONATE_NUKE" then
+			info = GameInfo.Missions.MISSION_NUKE
+		end
 		return info.IconIndex, info.IconAtlas
 	end,
 
@@ -1006,7 +1009,15 @@ local function OnUnitActionClicked( actionID )
 		if action.SubType == ActionSubTypes.ACTIONSUBTYPE_PROMOTION then
 			Events.AudioPlay2DSound("AS2D_INTERFACE_UNIT_PROMOTION")
 		end
-		Game.HandleAction( actionID )
+		if action.Type == "MISSION_DETONATE_NUKE" then
+			Events.SerialEventGameMessagePopup{
+				Type = ButtonPopupTypes.BUTTONPOPUP_CONFIRMCOMMAND,
+				Data1 = actionID,
+				Option1 = false,
+			}
+		else
+			Game.HandleAction( actionID )
+		end
 	end
 end
 
@@ -1048,6 +1059,7 @@ local function UpdateUnitActions( unit )
 			end
 			-- We hide the Action buttons when Units are out of moves so new players aren't confused
 			if hasMovesLeft or isPromotion
+				or action.Type == "MISSION_DETONATE_NUKE"
 				or action.Type == "COMMAND_CANCEL"
 				or action.Type == "COMMAND_STOP_AUTOMATION"
 			then
