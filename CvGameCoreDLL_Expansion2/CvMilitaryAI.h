@@ -206,6 +206,8 @@ public:
 	// Accessors to provide military data to other AI subsystems
 	bool ShouldFightBarbarians() const;
 	int GetNumberCivsAtWarWith(bool bIncludeMinor = true) const;
+	bool CanTrainNuclearWeapon() const;
+	int GetRecommendedNukeStockpile() const;
 	int GetRecommendedMilitarySize() const
 	{
 		return m_iRecLandUnits + m_iRecNavalUnits + m_iRecExplorerUnits;

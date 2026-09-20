@@ -36084,7 +36084,9 @@ bool CvCity::IsNukeKillable(int iNukeLevel)
 	if (IsOriginalCapital())
 		return false;
 
-	if (iNukeLevel < 2)
+	// Atomic Bombs, and Nuclear Missiles reduced to Atomic Bomb strength by
+	// interception, can destroy small non-capital cities as well.
+	if (iNukeLevel <= 0)
 		return false;
 
 	if (iNukeLevel > 2)

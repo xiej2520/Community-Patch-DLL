@@ -2251,7 +2251,14 @@ void CvMilitaryAI::DoNuke(PlayerTypes ePlayer)
 			{
 				bool bRollForNuke = false;
 				CivOpinionTypes eCivOpinion = m_pPlayer->GetDiplomacyAI()->GetCivOpinion(ePlayer);
-				if (eMilitaryStrength == STRENGTH_POWERFUL || eCurrentWarState <= WAR_STATE_TROUBLED)
+				int iFlavorNuke = m_pPlayer->GetFlavorManager()->GetPersonalityFlavorForDiplomacy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_USE_NUKE"));
+				// Nuke-focused leaders are willing to open nuclear escalation as soon as
+				// a worthwhile target exists, rather than waiting until the war turns bad.
+				if (iFlavorNuke >= 8)
+				{
+					bRollForNuke = true;
+				}
+				else if (eMilitaryStrength == STRENGTH_POWERFUL || eCurrentWarState <= WAR_STATE_TROUBLED)
 				{
 					// roll every turn
 					bRollForNuke = true;
@@ -2270,7 +2277,6 @@ void CvMilitaryAI::DoNuke(PlayerTypes ePlayer)
 				}
 				if (bRollForNuke)
 				{
-					int iFlavorNuke = m_pPlayer->GetFlavorManager()->GetPersonalityFlavorForDiplomacy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_USE_NUKE"));
 					int iRoll = GC.getGame().randRangeExclusive(0, 10, m_pPlayer->GetPseudoRandomSeed().mix(GET_PLAYER(ePlayer).GetPseudoRandomSeed()));
 					if (iRoll <= iFlavorNuke)
 					{
@@ -2283,6 +2289,53 @@ void CvMilitaryAI::DoNuke(PlayerTypes ePlayer)
 
 	if (bLaunchNuke)
 		RequestNukeAttack(ePlayer);
+}
+
+bool CvMilitaryAI::CanTrainNuclearWeapon() const
+{
+	for (int iUnit = 0; iUnit < GC.getNumUnitInfos(); iUnit++)
+	{
+		const UnitTypes eUnit = static_cast<UnitTypes>(iUnit);
+		CvUnitEntry* pkUnitInfo = GC.getUnitInfo(eUnit);
+		if (pkUnitInfo && pkUnitInfo->GetNukeDamageLevel() > 0 && m_pPlayer->canTrainUnit(eUnit))
+			return true;
+	}
+
+	return false;
+}
+
+int CvMilitaryAI::GetRecommendedNukeStockpile() const
+{
+	if (GC.getGame().isNoNukes() || !CanTrainNuclearWeapon())
+		return 0;
+
+	static FlavorTypes eNukeFlavor = (FlavorTypes)GC.getInfoTypeForString("FLAVOR_NUKE");
+	static ResourceTypes eUraniumResource = (ResourceTypes)GC.getInfoTypeForString("RESOURCE_URANIUM", true);
+
+	// Keep at least one third of the player's uranium available for a nuclear
+	// deterrent. Personality flavor moves this toward three quarters; the
+	// additional conditions below represent temporary military urgency.
+	int iPersonalityNukeFlavor = m_pPlayer->GetFlavorManager()->GetPersonalityIndividualFlavor(eNukeFlavor);
+	int iUraniumAllocationPercent = 33;
+	iUraniumAllocationPercent += min(42, max(0, iPersonalityNukeFlavor - 3) * 7);
+
+	int iCivsAtWar = GetNumberCivsAtWarWith(false);
+	if (iCivsAtWar > 0)
+		iUraniumAllocationPercent += 8;
+	if (iCivsAtWar > 1)
+		iUraniumAllocationPercent += 4;
+	if (m_pPlayer->GetDiplomacyAI()->IsGoingForWorldConquest() || m_pPlayer->GetDiplomacyAI()->IsCloseToWorldConquest())
+		iUraniumAllocationPercent += 8;
+
+	iUraniumAllocationPercent = min(75, max(33, iUraniumAllocationPercent));
+
+	// Use the gross domestic supply rather than the free remainder. If this
+	// were based on getNumResourceAvailable(), every GDR or Nuclear Plant
+	// would reduce the target and allow the AI to spend away its reserve.
+	int iUraniumSupply = max(0, m_pPlayer->getNumResourceTotal(eUraniumResource, false));
+	int iDesiredNukes = (iUraniumSupply * iUraniumAllocationPercent + 99) / 100;
+
+	return max(2, iDesiredNukes);
 }
 
 void CvMilitaryAI::SetupInstantDefenses(PlayerTypes ePlayer)
@@ -4044,10 +4097,7 @@ bool MilitaryAIHelpers::IsTestStrategy_NeedANuke(CvPlayer* pPlayer)
 		return true;
 	}
 
-	int iFlavorNuke = pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_NUKE"));
-	int iNumNukes = pPlayer->getNumNukeUnits();
-
-	return (iNumNukes < iFlavorNuke / 3);
+	return pPlayer->getNumNukeUnits() < pPlayer->GetMilitaryAI()->GetRecommendedNukeStockpile();
 }
 
 /// "Enough Anti-Air" Player Strategy: If a player has too many AA units

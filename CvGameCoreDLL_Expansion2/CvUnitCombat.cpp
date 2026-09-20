@@ -2537,7 +2537,7 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 	}
 
 	// Then the terrain effects
-	int iBlastRadius = /*2*/ range(GD_INT_GET(NUKE_BLAST_RADIUS), 1, 5);
+	int iBlastRadius = getNuclearBlastRadius(iDamageLevel);
 
 	for(int iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
 	{
@@ -2763,7 +2763,7 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 //	Returns the number of damaged entities (cities or units)
 int CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDamageLevel, CvUnit* pkAttacker, CvCombatMemberEntry* pkDamageArray, const int iMaxDamageMembers)
 {
-	const int iBlastRadius = /*2*/ range(GD_INT_GET(NUKE_BLAST_RADIUS), 1, 5);
+	const int iBlastRadius = getNuclearBlastRadius(iDamageLevel);
 
 	CvCity* pDefenderCity = NULL;
 	CvUnit* pDefenderUnit = NULL;
@@ -2831,13 +2831,19 @@ int CvUnitCombat::GenerateNuclearExplosionDamage(CvPlot* pkTargetPlot, int iDama
 							}
 						}
 
-						// Nuke level 1: units on impact plot are dealt lethal damage unless in a protected city; those in blast radius are dealt random damage
-						// Nuke level 2: all units on blast radius are dealt lethal damage unless in a protected city
+						// Nuke level 1: units on impact plot are dealt lethal damage unless in a protected city; those in blast radius are dealt random damage.
+						// Nuke level 2: units on the impact plot are dealt lethal damage; other units in the blast radius take 50-108 damage unless in a protected city.
 						// Trade units are always killed unless invulnerable
 						int iNukeDamage = 0;
-						if (iDamageLevel >= 2 || pLoopPlot == pkTargetPlot || bTradeUnit)
+						if (pLoopPlot == pkTargetPlot || bTradeUnit)
 						{
 							iNukeDamage = pLoopUnit->GetMaxHitPoints();
+						}
+						else if (iDamageLevel >= 2)
+						{
+							iNukeDamage = /*50*/ GD_INT_GET(NUKE_LEVEL2_UNIT_DAMAGE_BASE)
+								+ GC.getGame().randRangeExclusive(0, GD_INT_GET(NUKE_LEVEL2_UNIT_DAMAGE_RAND_1), CvSeeder(pLoopPlot->GetPseudoRandomSeed()))
+								+ GC.getGame().randRangeExclusive(0, GD_INT_GET(NUKE_LEVEL2_UNIT_DAMAGE_RAND_2), CvSeeder(pLoopUnit->GetID()).mix(iDX).mix(iDY));
 						}
 						else
 						{

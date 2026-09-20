@@ -576,7 +576,7 @@ UPDATE Units SET CombatClass = 'UNITCOMBAT_NUKE' WHERE Class = 'UNITCLASS_ATOMIC
 UPDATE Units
 SET
 	CombatClass = 'UNITCOMBAT_NUKE',
-	PrereqTech = 'TECH_LASERS'
+	PrereqTech = 'TECH_ADVANCED_BALLISTICS'
 WHERE Class = 'UNITCLASS_NUCLEAR_MISSILE';
 
 ----------------------------------------------------------------------------
