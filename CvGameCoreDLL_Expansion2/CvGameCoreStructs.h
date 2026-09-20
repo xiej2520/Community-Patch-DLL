@@ -327,6 +327,9 @@ public:
 	int getAttackNuclearLevel() const;
 	void setAttackNuclearLevel(int iNuclearDamageLevel);
 
+	bool getAttackIsSelfDetonation() const;
+	void setAttackIsSelfDetonation(bool bSelfDetonation);
+
 	int getDamageInflicted(BattleUnitTypes unitType) const;
 	void setDamageInflicted(BattleUnitTypes unitType, int iDamage);
 
@@ -375,6 +378,7 @@ protected:
 	bool		m_bDefenderCaptured;							//!< The defender is captured, not killed.
 
 	int			m_iNuclearDamageLevel;							//!< If > 0, the attack is a nuclear attack of the specified damage level
+	bool		m_bAttackIsSelfDetonation;						//!< The nuclear attack is detonated at the attacker's current plot
 
 	int			m_iFinalDamage[BATTLE_UNIT_COUNT];				//!< The units final damage value
 	int			m_iDamageInflicted[BATTLE_UNIT_COUNT];			//!< How much damage this unit inflicts on the opponent

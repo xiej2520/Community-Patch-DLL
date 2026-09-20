@@ -669,6 +669,9 @@ public:
 
 	bool isNukeVictim(const CvPlot* pPlot, TeamTypes eTeam) const;
 	bool canNuke() const;
+	bool canDetonateNuclear() const;
+	int GetNuclearDetonationDamageLevel() const;
+	bool IsGiantDeathRobot() const;
 	bool canNukeAt(const CvPlot* pPlot, int iX, int iY) const;
 
 	bool canParadrop(const CvPlot* pPlot, bool bOnlyTestVisibility, CvString* toolTipSink = NULL) const;

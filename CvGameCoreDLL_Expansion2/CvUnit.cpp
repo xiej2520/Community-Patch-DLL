@@ -8757,7 +8757,7 @@ bool CvUnit::isNukeVictim(const CvPlot* pPlot, TeamTypes eTeam) const
 		return false;
 	}
 
-	int iBlastRadius = getNuclearBlastRadius(GetNukeDamageLevel());
+	int iBlastRadius = getNuclearBlastRadius(GetNuclearDetonationDamageLevel());
 
 	for(iDX = -(iBlastRadius); iDX <= iBlastRadius; iDX++)
 	{
@@ -8789,6 +8789,39 @@ bool CvUnit::canNuke() const
 {
 	VALIDATE_OBJECT();
 	return GetNukeDamageLevel() > 0;
+}
+
+
+//	--------------------------------------------------------------------------------
+bool CvUnit::canDetonateNuclear() const
+{
+	VALIDATE_OBJECT();
+	return GetNuclearDetonationDamageLevel() > 0 && canMove();
+}
+
+
+//	--------------------------------------------------------------------------------
+int CvUnit::GetNuclearDetonationDamageLevel() const
+{
+	VALIDATE_OBJECT();
+
+	const int iNukeDamageLevel = GetNukeDamageLevel();
+	if (iNukeDamageLevel > 0)
+	{
+		return iNukeDamageLevel;
+	}
+
+	return IsGiantDeathRobot() ? 2 : 0;
+}
+
+
+//	--------------------------------------------------------------------------------
+bool CvUnit::IsGiantDeathRobot() const
+{
+	VALIDATE_OBJECT();
+
+	const UnitClassTypes eGiantDeathRobot = (UnitClassTypes)GC.getInfoTypeForString("UNITCLASS_MECH", true);
+	return eGiantDeathRobot != NO_UNITCLASS && getUnitClassType() == eGiantDeathRobot;
 }
 
 

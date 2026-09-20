@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
 	<Language_en_US>
+		<Row Tag="TXT_KEY_MISSION_DETONATE_NUKE">
+			<Text>Detonate Nuclear Weapon</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISSION_DETONATE_NUKE_HELP">
+			<Text>Detonate this unit at its current location. The explosion cannot be intercepted. Atomic Bombs use their normal blast strength; Nuclear Missiles and Giant Death Robots use the stronger 2-range blast. The unit is consumed.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISSION_DETONATE_NUKE_DISABLED_HELP">
+			<Text>This unit cannot detonate a nuclear weapon.</Text>
+		</Row>
 		<Row Tag="TXT_KEY_MISSION_FREE_LUXURY">
 			<Text>Voyage of Discovery</Text>
 		</Row>

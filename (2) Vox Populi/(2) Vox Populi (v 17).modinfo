@@ -1331,8 +1331,8 @@
     <File md5="92229C5ACAA6013A3CF7D150F17E0020" import="0">Database Changes/Units/PolicyUnitChanges.sql</File>
     <File md5="C3786E076D5E131E5DFE1AD56F59ABF0" import="0">Database Changes/Units/PreUnitChanges.sql</File>
     <File md5="C62B5CFA10CC761F0005EAA27C0380B5" import="0">Database Changes/Units/UnitAIChanges.sql</File>
-    <File md5="FAA566A29DCFC6B27EDE0D59A0FE766D" import="0">Database Changes/Units/UnitChanges.sql</File>
-    <File md5="29172E74A4062AE0B417B138E36C62A1" import="0">Database Changes/Units/UnitChanges2.sql</File>
+    <File md5="9210391D2CA8223187DD36B4D49DCA53" import="0">Database Changes/Units/UnitChanges.sql</File>
+    <File md5="0F07A6FD4F94B69185B85BC0D3DEEBBC" import="0">Database Changes/Units/UnitChanges2.sql</File>
     <File md5="3C2909716517F82589249271A81227C8" import="0">Database Changes/Units/UnitCostSweeps.sql</File>
     <File md5="BC0B978618FCBB7B0F3220100551BA40" import="0">Database Changes/Units/UnitStatChanges.sql</File>
     <File md5="B749545562014603F01E01BB68AD661A" import="0">Database Changes/Units/UnitSweeps.sql</File>
@@ -1382,7 +1382,7 @@
     <File md5="8F5C4A097A6F53AF68A73609B5EBD0FB" import="1">LUA/TopPanel.xml</File>
     <File md5="3DA0ECD74812B794EDF21FE68A96AFD1" import="1">LUA/UnitFlagManager.lua</File>
     <File md5="79EC0F518D3BE91C47CF662381D5C9FE" import="1">LUA/UnitFlagManager.xml</File>
-    <File md5="4574AF7EAF3BDB05D2B739F7CD877158" import="1">LUA/UnitPanel.lua</File>
+    <File md5="A1353AAF7FE48216D94DE199F99FFAEC" import="1">LUA/UnitPanel.lua</File>
     <File md5="B2C144C336B89AC862C6FFF7429E6717" import="1">Mapscripts/Amazon_XP.lua</File>
     <File md5="F38869FAB20A53207EA7DF69390BAE1E" import="1">Mapscripts/Arborea.lua</File>
     <File md5="D528028FBBA4F55BFF2401C61FA40AFD" import="1">Mapscripts/Boreal.lua</File>

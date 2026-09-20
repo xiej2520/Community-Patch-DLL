@@ -36,7 +36,7 @@ public:
 	static void GenerateRangedCombatInfo(CvCity& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo);
 	static void GenerateAirCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& kPlot, CvCombatInfo* pkCombatInfo);
 	static void GenerateAirSweepCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& kPlot, CvCombatInfo* pkCombatInfo);
-	static void GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, CvCombatInfo* pkCombatInfo);
+	static void GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, CvCombatInfo* pkCombatInfo, bool bSelfDetonation = false, int iNukeDamageLevel = -1);
 
 	static bool ParadropIntercept(CvUnit& paraUnit, CvPlot& dropPlot);
 
@@ -49,7 +49,7 @@ public:
 	static ATTACK_RESULT AttackAir(CvUnit& kAttacker, CvPlot& targetPlot, ATTACK_OPTION eOption);
 	static ATTACK_RESULT AttackAirSweep(CvUnit& kAttacker, CvPlot& targetPlot, ATTACK_OPTION eOption);
 	static ATTACK_RESULT AttackCity(CvUnit& kAttacker, CvPlot& plot, ATTACK_OPTION eOption);
-	static ATTACK_RESULT AttackNuclear(CvUnit& kAttacker, int iX, int iY, ATTACK_OPTION eOption);
+	static ATTACK_RESULT AttackNuclear(CvUnit& kAttacker, int iX, int iY, ATTACK_OPTION eOption, bool bSelfDetonation = false, int iNukeDamageLevel = -1);
 
 	//	Return a ranged unit that will defend the supplied location against the attacker at the specified location.
 	static CvUnit*		GetFireSupportUnit(PlayerTypes eDefender, int iDefendX, int iDefendY, int iAttackX, int iAttackY);

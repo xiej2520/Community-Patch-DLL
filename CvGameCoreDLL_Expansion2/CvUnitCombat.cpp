@@ -97,6 +97,29 @@ static CvCombatMemberEntry* AddCombatMember(CvCombatMemberEntry* pkArray, int* p
 	return NULL;
 }
 
+//---------------------------------------------------------------------------
+// Keep the diplomatic victim check in lockstep with the blast radius used to
+// generate damage.  This matters for self-detonation, where the damage level
+// can be supplied explicitly (for example, a GDR uses nuclear-missile power).
+static bool IsNuclearVictimAtPlot(const CvUnit& kAttacker, const CvPlot& kTargetPlot, TeamTypes eTeam, int iDamageLevel)
+{
+	if(!GET_TEAM(eTeam).isAlive() || eTeam == kAttacker.getTeam())
+		return false;
+
+	const int iBlastRadius = getNuclearBlastRadius(iDamageLevel);
+	for(int iDX = -iBlastRadius; iDX <= iBlastRadius; ++iDX)
+	{
+		for(int iDY = -iBlastRadius; iDY <= iBlastRadius; ++iDY)
+		{
+			CvPlot* pLoopPlot = plotXYWithRangeCheck(kTargetPlot.getX(), kTargetPlot.getY(), iDX, iDY, iBlastRadius);
+			if(pLoopPlot != NULL && (pLoopPlot->getTeam() == eTeam || pLoopPlot->plotCheck(PUF_isCombatTeam, eTeam, kAttacker.getTeam()) != NULL))
+				return true;
+		}
+	}
+
+	return false;
+}
+
 //	---------------------------------------------------------------------------
 void CvUnitCombat::GenerateMeleeCombatInfo(CvUnit& kAttacker, CvUnit* pkDefender, CvPlot& plot, CvCombatInfo* pkCombatInfo)
 {
@@ -2240,12 +2263,17 @@ void CvUnitCombat::ResolveAirSweep(const CvCombatInfo& kCombatInfo, uint uiParen
 //		plot         	-	The plot of the defending unit/city
 //		pkCombatInfo 	-	Output combat info
 //	---------------------------------------------------------------------------
-void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, CvCombatInfo* pkCombatInfo)
+void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, CvCombatInfo* pkCombatInfo, bool bSelfDetonation, int iNukeDamageLevelOverride)
 {
 	BATTLE_STARTED(BATTLE_TYPE_NUKE, plot);
 	pkCombatInfo->setUnit(BATTLE_UNIT_ATTACKER, &kAttacker);
 	pkCombatInfo->setUnit(BATTLE_UNIT_DEFENDER, NULL);
 	pkCombatInfo->setPlot(&plot);
+	pkCombatInfo->setAttackIsSelfDetonation(bSelfDetonation);
+
+	const int iNukeDamageLevel = iNukeDamageLevelOverride >= 0
+		? iNukeDamageLevelOverride
+		: kAttacker.GetNukeDamageLevel();
 
 	if (plot.isCity())
 	{
@@ -2258,7 +2286,7 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 	}
 
 	// Any interception to be done?
-	CvCity* pInterceptionCity = plot.GetNukeInterceptor(kAttacker.getOwner());
+	CvCity* pInterceptionCity = bSelfDetonation ? NULL : plot.GetNukeInterceptor(kAttacker.getOwner());
 	bool bInterceptionSuccess = false;
 	bool bPartialInterception = false;
 	CvPlot* pInterceptionCityPlot = NULL;
@@ -2277,7 +2305,7 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 			}
 			if (bInterceptionSuccess)
 			{
-				if (kAttacker.GetNukeDamageLevel() == 1) // Atomic Bombs are destroyed outright
+				if (iNukeDamageLevel == 1) // Atomic Bombs are destroyed outright
 				{
 					pkCombatInfo->setDamageInflicted(BATTLE_UNIT_INTERCEPTOR, kAttacker.GetCurrHitPoints());
 					kAttacker.kill(true, pInterceptionCity->getOwner());
@@ -2295,7 +2323,7 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 	bool abTeamsAffected[MAX_TEAMS];
 	for (int iI = 0; iI < MAX_TEAMS; iI++)
 	{
-		abTeamsAffected[iI] = kAttacker.isNukeVictim(&plot, ((TeamTypes)iI));
+		abTeamsAffected[iI] = IsNuclearVictimAtPlot(kAttacker, plot, ((TeamTypes)iI), iNukeDamageLevel);
 	}
 
 	int iPlotTeam = plot.getTeam();
@@ -2470,13 +2498,13 @@ void CvUnitCombat::GenerateNuclearCombatInfo(CvUnit& kAttacker, CvPlot& plot, Cv
 		}
 	}
 
-	int iNukeDamageLevel = bPartialInterception ? 1 : kAttacker.GetNukeDamageLevel();
+	int iActualNukeDamageLevel = bPartialInterception ? 1 : iNukeDamageLevel;
 	pkCombatInfo->setAttackIsBombingMission(true);
 	pkCombatInfo->setDefenderRetaliates(false);
-	pkCombatInfo->setAttackNuclearLevel(iNukeDamageLevel + 1);
+	pkCombatInfo->setAttackNuclearLevel(iActualNukeDamageLevel + 1);
 
 	// Set all of the units in the blast radius to defenders and calculate their damage
-	int iDamageMembers = GenerateNuclearExplosionDamage(&plot, iNukeDamageLevel, &kAttacker, pkCombatInfo->getDamageMembers(), pkCombatInfo->getMaxDamageMemberCount());
+	int iDamageMembers = GenerateNuclearExplosionDamage(&plot, iActualNukeDamageLevel, &kAttacker, pkCombatInfo->getDamageMembers(), pkCombatInfo->getMaxDamageMemberCount());
 	pkCombatInfo->setDamageMemberCount(iDamageMembers);
 
 	GC.GetEngineUserInterface()->setDirty(UnitInfo_DIRTY_BIT, true);
@@ -2959,7 +2987,7 @@ void CvUnitCombat::ResolveNuclearCombat(const CvCombatInfo& kCombatInfo, uint ui
 		}
 
 		// Suicide Unit (currently all nuclear attackers are)
-		if(pkAttacker->isSuicide())
+		if(pkAttacker->isSuicide() || kCombatInfo.getAttackIsSelfDetonation())
 		{
 			pkAttacker->setCombatUnit(NULL);	// Must clear this if doing a delayed kill, should this be part of the kill method?
 			pkAttacker->setAttackPlot(NULL, false);
@@ -4154,17 +4182,22 @@ CvUnit* CvUnitCombat::GetFireSupportUnit(PlayerTypes eDefender, int iDefendX, in
 }
 
 //	----------------------------------------------------------------------------
-CvUnitCombat::ATTACK_RESULT CvUnitCombat::AttackNuclear(CvUnit& kAttacker, int iX, int iY, ATTACK_OPTION /* eOption */)
+CvUnitCombat::ATTACK_RESULT CvUnitCombat::AttackNuclear(CvUnit& kAttacker, int iX, int iY, ATTACK_OPTION /* eOption */, bool bSelfDetonation, int iNukeDamageLevel)
 {
 	ATTACK_RESULT eResult = ATTACK_ABORTED;
 
 	CvPlot* pPlot = GC.getMap().plot(iX, iY);
+	if(pPlot == NULL && bSelfDetonation)
+	{
+		CvUnit* pTransportUnit = kAttacker.getTransportUnit();
+		pPlot = pTransportUnit != NULL ? pTransportUnit->plot() : kAttacker.plot();
+	}
 	if(NULL == pPlot)
 		return eResult;
 
 	bool bDoImmediate = CvPreGame::quickCombat();
 	CvCombatInfo kCombatInfo;
-	CvUnitCombat::GenerateNuclearCombatInfo(kAttacker, *pPlot, &kCombatInfo);
+	CvUnitCombat::GenerateNuclearCombatInfo(kAttacker, *pPlot, &kCombatInfo, bSelfDetonation, iNukeDamageLevel);
 
 	uint uiParentEventID = 0;
 	kAttacker.setMadeAttack(true);

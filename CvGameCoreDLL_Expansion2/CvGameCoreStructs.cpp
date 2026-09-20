@@ -175,6 +175,7 @@ CvCombatInfo::CvCombatInfo() :
 	m_bDefenderRetaliates(true),
 	m_bDefenderCaptured(false),
 	m_iNuclearDamageLevel(0),
+	m_bAttackIsSelfDetonation(false),
 	m_bVisualize(false),
 	m_bAttackedAdvancedVis(false),
 	m_iDamageMemberCount(0)
@@ -204,6 +205,7 @@ CvCombatInfo& CvCombatInfo::operator=(const CvCombatInfo& rhs)
 	m_bDefenderCaptured = rhs.m_bDefenderCaptured;
 	m_bDefenderRetaliates = rhs.m_bDefenderRetaliates;
 	m_iNuclearDamageLevel = rhs.m_iNuclearDamageLevel;
+	m_bAttackIsSelfDetonation = rhs.m_bAttackIsSelfDetonation;
 	m_bVisualize = rhs.m_bVisualize;
 	m_bAttackedAdvancedVis = rhs.m_bAttackedAdvancedVis;
 
@@ -492,6 +494,16 @@ int CvCombatInfo::getAttackNuclearLevel() const
 void CvCombatInfo::setAttackNuclearLevel(int iNuclearDamageLevel)
 {
 	m_iNuclearDamageLevel = iNuclearDamageLevel;
+}
+
+bool CvCombatInfo::getAttackIsSelfDetonation() const
+{
+	return m_bAttackIsSelfDetonation;
+}
+
+void CvCombatInfo::setAttackIsSelfDetonation(bool bSelfDetonation)
+{
+	m_bAttackIsSelfDetonation = bSelfDetonation;
 }
 
 const CvCombatMemberEntry* CvCombatInfo::getCombatMember(BattleUnitTypes unitType) const
