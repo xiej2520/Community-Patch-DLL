@@ -3323,10 +3323,37 @@ ReachablePlots CvPathFinder::GetPlotsInReach(int iXstart, int iYstart, const SPa
 	//there is no destination! the return value will always be false
 	CvAStar::FindPathWithCurrentConfiguration(iXstart, iYstart, -1, -1);
 
+	// A reachable-plot result can contain at most one entry per map plot.  The
+	// old code let this vector grow geometrically while walking the closed-node
+	// list.  That temporarily required both the old and new allocation and was
+	// enough to exhaust Civ V's 32-bit address space.  Reserve once, and keep
+	// the result bounded, so a large query cannot repeatedly reallocate.
+	const int iNumMapPlots = GC.getMap().numPlots();
+	const size_t maxReachablePlots = iNumMapPlots > 0 ? static_cast<size_t>(iNumMapPlots) : 0;
+	const size_t expectedReachablePlots = std::min(m_closedNodes.size(), maxReachablePlots);
+	try
+	{
+		plots.reserve(expectedReachablePlots);
+	}
+	catch (const std::bad_alloc&)
+	{
+		if(!bHadLock)
+			gDLL->ReleaseGameCoreLock();
+		return ReachablePlots();
+	}
+
 	//iterate all previously touched nodes
 	for (std::vector<CvAStarNode*>::const_iterator it=m_closedNodes.begin(); it!=m_closedNodes.end(); ++it)
 	{
 		CvAStarNode* temp = *it;
+		if (!temp || !isValid(temp->m_iX, temp->m_iY))
+			continue;
+
+		// Two-layer pathfinding can touch more than one node for a map plot.
+		// ReachablePlots is indexed by plot, so retaining more than the number
+		// of map plots is never useful and would defeat the allocation bound.
+		if (plots.size() >= maxReachablePlots)
+			break;
 
 		bool bValid = true;
 
@@ -3342,14 +3369,23 @@ ReachablePlots CvPathFinder::GetPlotsInReach(int iXstart, int iYstart, const SPa
 		if (bValid)
 		{
 			int iNormalizedDistanceRaw = (temp->m_iKnownCost*SPath::getNormalizedDistanceBase()) / m_iBasicPlotCost + 1;
-			plots.insertNoIndex( SMovePlot(GC.getMap().plotNum(temp->m_iX, temp->m_iY),temp->m_iTurns,temp->m_iMoves,iNormalizedDistanceRaw) );
+			const int iPlotIndex = GC.getMap().plotNum(temp->m_iX, temp->m_iY);
+			if (iPlotIndex >= 0 && iPlotIndex < iNumMapPlots)
+				plots.insertNoIndex( SMovePlot(iPlotIndex,temp->m_iTurns,temp->m_iMoves,iNormalizedDistanceRaw) );
 		}
 	}
 
 	if(!bHadLock)
 		gDLL->ReleaseGameCoreLock();
 
-	plots.createIndex();
+	try
+	{
+		plots.createIndex();
+	}
+	catch (const std::bad_alloc&)
+	{
+		return ReachablePlots();
+	}
 	return plots;
 }
 

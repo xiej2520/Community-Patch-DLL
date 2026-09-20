@@ -290,6 +290,7 @@ public:
 	const_iterator find(int iPlotIndex) const;
 	void insertWithIndex(const SMovePlot& plot);
 	void insertNoIndex(const SMovePlot& plot);
+	void reserve(size_t count) { storage.reserve(count); }
 	void createIndex();
 
 	bool operator==(const ReachablePlots& rhs) const { return storage == rhs.storage && lookup == rhs.lookup; }

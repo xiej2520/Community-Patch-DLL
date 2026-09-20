@@ -2508,6 +2508,10 @@ uint CvUnitCombat::ApplyNuclearExplosionDamage(const CvCombatMemberEntry* pkDama
 			{
 				// Apply the damage
 				pkUnit->setCombatUnit(NULL);
+				// A unit can still have an attack plot when the detonation
+				// interrupts its pending combat. Cancel that attack before a
+				// lethal blast removes the unit.
+				pkUnit->setAttackPlot(NULL, false);
 				pkUnit->ClearMissionQueue();
 				pkUnit->SetAutomateType(NO_AUTOMATE); // kick unit out of automation
 

@@ -5136,6 +5136,12 @@ void CvDiplomacyAI::SetEverBackstabbedBy(PlayerTypes ePlayer, bool bValue)
 /// Apply a backstabbing mark for ePlayer and their teammates to our entire team
 void CvDiplomacyAI::SetBackstabbedBy(PlayerTypes ePlayer, bool bValue, bool bSkipReevaluation)
 {
+	// Teammates cannot backstab one another.  This can be reached while team
+	// membership is being merged, before every diplomacy cache has been
+	// rewritten, so treat an intra-team entry as a no-op rather than asserting.
+	if (!NotTeam(ePlayer))
+		return;
+
 	vector<PlayerTypes> vOurTeam = GET_TEAM(GetTeam()).getPlayers();
 	vector<PlayerTypes> vTheirTeam = GET_TEAM(GET_PLAYER(ePlayer).getTeam()).getPlayers();
 	for (size_t i=0; i<vOurTeam.size(); i++)
@@ -8171,12 +8177,16 @@ void CvDiplomacyAI::SetNumTimesNuked(PlayerTypes ePlayer, int iValue)
 {
 	PRECONDITION(ePlayer >= 0 && ePlayer < MAX_MAJOR_CIVS, "Player index out of bounds");
 	ASSERT(iValue >= 0, "Setting NumTimesNuked to a negative value");
-	ASSERT(NotMe(ePlayer), "Setting NumTimesNuked for self");
+	if (!NotMe(ePlayer) || !NotTeam(ePlayer))
+		return;
 	m_aiNumTimesNuked[ePlayer] = min(iValue, UCHAR_MAX);
 }
 
 void CvDiplomacyAI::ChangeNumTimesNuked(PlayerTypes ePlayer, int iChange)
 {
+	if (!NotMe(ePlayer) || !NotTeam(ePlayer))
+		return;
+
 	SetNumTimesNuked(ePlayer, GetNumTimesNuked(ePlayer) + iChange);
 
 	// and do diplo...
