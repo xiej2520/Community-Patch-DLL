@@ -463,6 +463,12 @@
 		<Row Tag="TXT_KEY_IGE_FORM_TEAM_NONE">
 			<Text>Everyone is... on the same team ?!</Text>
 		</Row>
+		<Row Tag="TXT_KEY_IGE_DEFENSIVE_PACT">
+			<Text>Make Defensive Pact</Text>
+		</Row>
+		<Row Tag="TXT_KEY_IGE_DEFENSIVE_PACT_NONE">
+			<Text>No eligible civilization for a defensive pact.</Text>
+		</Row>
 		<Row Tag="TXT_KEY_IGE_MAKE_PEACE">
 			<Text>Make Peace</Text>
 		</Row>
@@ -526,6 +532,9 @@
 		<Row Tag="TXT_KEY_IGE_ALREADY_AT_WAR_ERROR">
 			<Text>[COLOR_NEGATIVE_TEXT]You are already at war.[ENDCOLOR]</Text>
 		</Row>
+		<Row Tag="TXT_KEY_IGE_ALREADY_DEFENSIVE_PACT_ERROR">
+			<Text>[COLOR_NEGATIVE_TEXT]You already have a defensive pact.[ENDCOLOR]</Text>
+		</Row>
 		<Row Tag="TXT_KEY_IGE_ALREADY_DENOUNCED_ERROR">
 			<Text>[COLOR_NEGATIVE_TEXT]You already denounced this civilization.[ENDCOLOR]</Text>
 		</Row>
@@ -537,6 +546,12 @@
 		</Row>
 		<Row Tag="TXT_KEY_IGE_NOTIFY_ALLIANCE_LONG">
 			<Text>You made an alliance with {1_PlyrName}.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_IGE_NOTIFY_DEFENSIVE_PACT_SHORT">
+			<Text>Defensive pact with {1_PlyrName}.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_IGE_NOTIFY_DEFENSIVE_PACT_LONG">
+			<Text>You made a defensive pact with {1_PlyrName}.</Text>
 		</Row>
 		<Row Tag="TXT_KEY_IGE_NOTIFY_DOF_SHORT">
 			<Text>Declaration of friendship with {1_PlyrName}.</Text>
@@ -729,5 +744,28 @@
 		<Row Tag="TXT_KEY_IGE_SAVED_AS">
 			<Text>Game saved as '{1_FileName}'.</Text>
 		</Row>
+		<!-- IGE_WorldCongressPanel.xml -->
+		<Row Tag="TXT_KEY_IGE_CONGRESS_PANEL"><Text>World Congress</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_PANEL_HELP"><Text>Edit Congress resolutions, host, session timing, and persistent bonus delegates.</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_NONE"><Text>The World Congress has not been founded.</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_DLL_REQUIRED"><Text>This panel requires the accompanying modified Community Patch DLL. Rebuild and install the DLL, then restart Civilization V.</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_IN_SESSION"><Text>[COLOR_WARNING_TEXT]Session in progress: host, timer, and resolution changes are locked.[ENDCOLOR]</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_NEXT_SESSION"><Text>Next session in {1_Num} turns</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_TURNS"><Text>Turns:</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_TURNS_HELP"><Text>Turns until the next regular session.</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_MEMBERS"><Text>Members</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_TOTAL"><Text>Total</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_BONUS"><Text>Bonus</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_TOTAL_DELEGATES_HELP"><Text>Calculated delegates for the next session.</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_CURRENT_VOTES"><Text>{1_Num} remaining; {2_Num} spent this session.</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_HOST"><Text>Host</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_MAKE_HOST"><Text>Make Host</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_AVAILABLE_RESOLUTIONS"><Text>Available resolutions</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_ACTIVE_RESOLUTIONS"><Text>Active resolutions</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_ENACT"><Text>Enact</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_REPEAL"><Text>Repeal</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_CONFIRM_HOST"><Text>Make {1_Civ} the World Congress host?</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_CONFIRM_ENACT"><Text>Immediately enact {1_Resolution}? This bypasses voting.</Text></Row>
+		<Row Tag="TXT_KEY_IGE_CONGRESS_CONFIRM_REPEAL"><Text>Immediately repeal {1_Resolution}? This bypasses voting.</Text></Row>
 	</Language_en_US>
 </GameData>

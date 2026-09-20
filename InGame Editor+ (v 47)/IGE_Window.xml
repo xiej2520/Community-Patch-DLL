@@ -83,6 +83,7 @@
 					<LuaContext FileName="IGE_PlayersPanel"				ID="PlayersPanel" />
 					<LuaContext FileName="IGE_TechsPanel"				ID="TechsPanel" />
 					<LuaContext FileName="IGE_PoliciesPanel"			ID="PoliciesPanel" />
+					<LuaContext FileName="IGE_WorldCongressPanel"		ID="WorldCongressPanel" />
 				</Container>
 			</Box >
 		</Grid>

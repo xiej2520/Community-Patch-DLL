@@ -600,6 +600,8 @@ public:
 	bool CanEverVote(PlayerTypes ePlayer);
 	int GetRemainingVotesForMember(PlayerTypes ePlayer);
 	int GetSpentVotesForMember(PlayerTypes ePlayer);
+	int GetExtraVotesForMember(PlayerTypes ePlayer);
+	void SetExtraVotesForMember(PlayerTypes ePlayer, int iValue);
 	int GetPotentialVotesForMember(PlayerTypes ePlayer, PlayerTypes eFromPlayer);
 	int GetCoreVotesForMember(PlayerTypes ePlayer);
 	int CalculateStartingVotesForMember(PlayerTypes ePlayer, bool bFakeUN = false, bool bForceUpdateSources = false);
