@@ -61,6 +61,11 @@ def get_text(element: Optional[ET.Element], default: str = '') -> str:
     return element.text or default
 
 
+def normalize_project_path(path: str) -> Path:
+    """Convert Visual Studio's Windows separators to the host separators."""
+    return Path(path.replace('\\', '/'))
+
+
 def parse_civ5proj(civ5proj_path: Path) -> dict:
     tree = ET.parse(civ5proj_path)
     root = tree.getroot()
@@ -234,7 +239,7 @@ def generate_modinfo_xml(data: dict, mod_dir: Path) -> str:
     lines.append('  <Files>')
     missing = []
     for file_info in data['files']:
-        file_path = Path(file_info['path'])
+        file_path = normalize_project_path(file_info['path'])
         full_path = mod_dir / file_path
         if full_path.exists():
             md5_hash = compute_md5(full_path)

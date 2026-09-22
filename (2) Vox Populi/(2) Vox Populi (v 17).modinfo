@@ -1061,7 +1061,7 @@
     <File md5="63B3FC73D1D8FFBF6CAEC7AA481AD2DA" import="1">Core Files/Core Changes/farm_types.xml</File>
     <File md5="5E37DC7960391AFF4F89851AC22A1192" import="0">Core Files/New Lua/CBP_IncaFunctions.lua</File>
     <File md5="CE52E119CFD1431AA48DD2E97F31B083" import="0">Core Files/New Lua/GlobalArchaeologistDigSites.lua</File>
-    <File md5="216309B0B9233E74B23607770CF5A3C1" import="0">Core Files/New UI/CorporationsOverview.lua</File>
+    <File md5="A311C210A5D50D7D617FDC20834625FA" import="0">Core Files/New UI/CorporationsOverview.lua</File>
     <File md5="548D293873BE47A59BB278BA45710B6F" import="0">Core Files/New UI/CorporationsOverview.xml</File>
     <File md5="986930B9C8C4D967DBFAF8948EAB647D" import="1">Core Files/New UI/OverlayAntiquities.lua</File>
     <File md5="FB545F363364D00F576AD9DC98EF3D86" import="1">Core Files/New UI/OverlayAntiquities.xml</File>
@@ -1143,7 +1143,7 @@
     <File md5="7124A62C8FCD0B55705D8C252605477E" import="0">Database Changes/AI/ProjectFlavorChanges.sql</File>
     <File md5="602B461B5228346EEA274B1170B9B410" import="0">Database Changes/AI/StrategyChanges.sql</File>
     <File md5="3B44A9ADAA9D2E4C1B667FF4F0A4205B" import="0">Database Changes/AI/StrategyFlavorSweeps.sql</File>
-    <File md5="964AE425B6556AC008E033174BAC1FF0" import="0">Database Changes/AI/TechFlavorSweeps.sql</File>
+    <File md5="00521B6E2FFA9945DF0A7D1495FC60AB" import="0">Database Changes/AI/TechFlavorSweeps.sql</File>
     <File md5="337DD12FFC11972B828E052F47B02628" import="0">Database Changes/AI/UnitFlavorSweeps.sql</File>
     <File md5="9967F7AE00D1A80DF9F3CAE30BD648F3" import="0">Database Changes/Art/ImprovementArtChanges.sql</File>
     <File md5="4D64F6FB7DB689A36908292FCDBDC8CC" import="0">Database Changes/Art/NewIcons.xml</File>
@@ -1163,7 +1163,7 @@
     <File md5="41D51B1D68B8200B2B6C1E530A1A0636" import="0">Database Changes/Beliefs/ReformationChanges.sql</File>
     <File md5="D2DC1C33418B2C854337D6661E786B55" import="0">Database Changes/Beliefs/TooltipSweeps.sql</File>
     <File md5="044A57B02AC7076B0E8C07B084B2C66D" import="0">Database Changes/City/NewGreatWorks.xml</File>
-    <File md5="7DEDA07FC3F09E5B7962381E6606D455" import="0">Database Changes/City/Buildings/BuildingChanges.sql</File>
+    <File md5="F4FC709F7D379A7D32E038B37BE2C2F9" import="0">Database Changes/City/Buildings/BuildingChanges.sql</File>
     <File md5="37E6546FFE984A65D80A7A3E85738BDD" import="0">Database Changes/City/Buildings/BuildingChanges2.sql</File>
     <File md5="9B10B2F5FFCB495E3648C7197A43F8D3" import="0">Database Changes/City/Buildings/BuildingCostSweeps.sql</File>
     <File md5="DF578A910BE1F7805C22ABA631BBE9F9" import="0">Database Changes/City/Buildings/BuildingSweeps.sql</File>
@@ -1260,13 +1260,13 @@
     <File md5="53E2D82FED33B77AC09D228814425A15" import="0">Database Changes/Text/en_US/GameOptionTextChanges.sql</File>
     <File md5="5F845A2FAAE68B85AAD18CBBA85D1568" import="0">Database Changes/Text/en_US/NewAutomateText.xml</File>
     <File md5="54E6B747A0071A256C3444BD334506CE" import="0">Database Changes/Text/en_US/NewGameOptionText.xml</File>
-    <File md5="5501AC6C2717BED81F9B485359E2A06C" import="0">Database Changes/Text/en_US/NewMapscriptText.xml</File>
+    <File md5="5F3866DBDBF81968FF729F8DD08731C0" import="0">Database Changes/Text/en_US/NewMapscriptText.xml</File>
     <File md5="726494AE19D2C3A3132A4B710AFCD498" import="0">Database Changes/Text/en_US/AI/DiplomacyResponseTextChanges.sql</File>
     <File md5="701584AAECE6149996D3FABF93F9DCFA" import="0">Database Changes/Text/en_US/AI/NewDiplomacyResponseText.xml</File>
     <File md5="2D42E990457416F8137E88B754C788DE" import="0">Database Changes/Text/en_US/Beliefs/BeliefTextChanges.sql</File>
     <File md5="4F7C710703C9A7AEAF835ECCE1075FAD" import="0">Database Changes/Text/en_US/Beliefs/NewBeliefText.xml</File>
     <File md5="AA64216AE091FCB37C934575BE8D08C6" import="0">Database Changes/Text/en_US/City/PreBuildingTextChanges.sql</File>
-    <File md5="9060E7473515CAA466C014797A0169EA" import="0">Database Changes/Text/en_US/City/BuildingTextChanges.sql</File>
+    <File md5="A1A7850349B83BCDC5EFEE30E4E3498E" import="0">Database Changes/Text/en_US/City/BuildingTextChanges.sql</File>
     <File md5="016A12986E64507253B5CE5202A624FC" import="0">Database Changes/Text/en_US/City/NewBuildingText.xml</File>
     <File md5="9ABA8ABD3DABC418751EE479C1EB43B5" import="0">Database Changes/Text/en_US/City/NewGreatWorkText.xml</File>
     <File md5="0FB16728782FC50FBCCCD35A4908B759" import="0">Database Changes/Text/en_US/City/NewProcessText.xml</File>
@@ -1299,9 +1299,9 @@
     <File md5="0F7FA7A5B4A7208E6D443ADB8E3C1D5D" import="0">Database Changes/Text/en_US/UnitPromotions/PromotionTextChanges.sql</File>
     <File md5="DDA7CA65AFBAC78647BE27D28C01203E" import="0">Database Changes/Text/en_US/Units/PreUnitTextChanges.sql</File>
     <File md5="AF719FC045F45D377CCB5C09EBC6AEED" import="0">Database Changes/Text/en_US/Units/MissionTextChanges.sql</File>
-    <File md5="A04F506807D852F925D1AD5901AF76C7" import="0">Database Changes/Text/en_US/Units/NewMissionText.xml</File>
+    <File md5="B8AFEF16D9A94B56625E4E842EAC6A5F" import="0">Database Changes/Text/en_US/Units/NewMissionText.xml</File>
     <File md5="D2EFE53DFE4412953E6A1B9F8C72DFD6" import="0">Database Changes/Text/en_US/Units/NewUnitText.xml</File>
-    <File md5="FDA526CF32D8FF8DF170CE4785F14ED4" import="0">Database Changes/Text/en_US/Units/UnitTextChanges.sql</File>
+    <File md5="F301EC17A2C50FF37687EC5262479E79" import="0">Database Changes/Text/en_US/Units/UnitTextChanges.sql</File>
     <File md5="A257CBAE5C12FB43054F8FAAE36B384B" import="0">Database Changes/Text/en_US/WorldCongress/NewProjectText.xml</File>
     <File md5="D94CF49040D777C987C655EC7EA34AFC" import="0">Database Changes/Text/en_US/WorldCongress/NewResolutionText.xml</File>
     <File md5="1DB9390906CDF9F5B075CB6BE4BD6167" import="0">Database Changes/Text/en_US/WorldCongress/ProjectTextChanges.sql</File>
@@ -1325,15 +1325,15 @@
     <File md5="8162D95F0D760FB1BE03C2A2F5FCEC97" import="0">Database Changes/Units/BarbarianUnitChanges.sql</File>
     <File md5="2CA8A9501CD13590CDCDE70816879094" import="0">Database Changes/Units/CityStateUnitChanges.sql</File>
     <File md5="704B9F628BECBE2C57479EA10B1823D7" import="0">Database Changes/Units/NewGreatPeople.xml</File>
-    <File md5="CE499773066E43063750E9FA98C61C12" import="0">Database Changes/Units/NewMissions.xml</File>
+    <File md5="DB168184AED801B5FBCC8FE31643FC25" import="0">Database Changes/Units/NewMissions.xml</File>
     <File md5="54C5AE1A26889A12C4F8EEADBE31DA37" import="0">Database Changes/Units/NewUnitFormations.xml</File>
     <File md5="59C7C8AEA699D3B8EB2A23DAF151D99B" import="0">Database Changes/Units/NewUnits.xml</File>
     <File md5="92229C5ACAA6013A3CF7D150F17E0020" import="0">Database Changes/Units/PolicyUnitChanges.sql</File>
     <File md5="C3786E076D5E131E5DFE1AD56F59ABF0" import="0">Database Changes/Units/PreUnitChanges.sql</File>
     <File md5="C62B5CFA10CC761F0005EAA27C0380B5" import="0">Database Changes/Units/UnitAIChanges.sql</File>
-    <File md5="9210391D2CA8223187DD36B4D49DCA53" import="0">Database Changes/Units/UnitChanges.sql</File>
-    <File md5="0F07A6FD4F94B69185B85BC0D3DEEBBC" import="0">Database Changes/Units/UnitChanges2.sql</File>
-    <File md5="3C2909716517F82589249271A81227C8" import="0">Database Changes/Units/UnitCostSweeps.sql</File>
+    <File md5="CD9C3C677A9A2E19F9C60B5BDCD539E2" import="0">Database Changes/Units/UnitChanges.sql</File>
+    <File md5="A59AE013881C1C4A19A9008E5F3C11FE" import="0">Database Changes/Units/UnitChanges2.sql</File>
+    <File md5="C9095E6E7A0DCA2F9B81D5580C75D256" import="0">Database Changes/Units/UnitCostSweeps.sql</File>
     <File md5="BC0B978618FCBB7B0F3220100551BA40" import="0">Database Changes/Units/UnitStatChanges.sql</File>
     <File md5="B749545562014603F01E01BB68AD661A" import="0">Database Changes/Units/UnitSweeps.sql</File>
     <File md5="3C54AAAFC2EAE4978FB82FBF86D7E689" import="0">Database Changes/WorldCongress/CongressChanges.sql</File>
@@ -1351,7 +1351,7 @@
     <File md5="077CDAB06D0644BD3B3A815BD513CC5D" import="0">Database Changes/WorldMap/Features/NaturalWonderChanges.sql</File>
     <File md5="D554AD512BC50B7CF2E5D497C2A7F15A" import="0">Database Changes/WorldMap/Improvements/BuildChanges.sql</File>
     <File md5="BD912CB28AFD96936BCE20C5491ED9E2" import="0">Database Changes/WorldMap/Improvements/BuildSweeps.sql</File>
-    <File md5="885B7BD0BCC050792F5E91B8654731B2" import="0">Database Changes/WorldMap/Improvements/ImprovementChanges.sql</File>
+    <File md5="3B4BC01C17FF80FB7E2AE83625E9F128" import="0">Database Changes/WorldMap/Improvements/ImprovementChanges.sql</File>
     <File md5="4C8067A3667F93CEE4267C4F1FF3F4F8" import="0">Database Changes/WorldMap/Improvements/ImprovementSweeps.sql</File>
     <File md5="4990A8078DDA3DDEE64F7C21EF9FEBFE" import="0">Database Changes/WorldMap/Improvements/NewBuilds.xml</File>
     <File md5="A3FEFA600B711E5662656E99BE770002" import="0">Database Changes/WorldMap/Improvements/NewImprovements.xml</File>
@@ -1382,10 +1382,11 @@
     <File md5="8F5C4A097A6F53AF68A73609B5EBD0FB" import="1">LUA/TopPanel.xml</File>
     <File md5="3DA0ECD74812B794EDF21FE68A96AFD1" import="1">LUA/UnitFlagManager.lua</File>
     <File md5="79EC0F518D3BE91C47CF662381D5C9FE" import="1">LUA/UnitFlagManager.xml</File>
-    <File md5="A1353AAF7FE48216D94DE199F99FFAEC" import="1">LUA/UnitPanel.lua</File>
+    <File md5="55F09FAEC5C552D58C4893807E348555" import="1">LUA/UnitPanel.lua</File>
     <File md5="B2C144C336B89AC862C6FFF7429E6717" import="1">Mapscripts/Amazon_XP.lua</File>
     <File md5="F38869FAB20A53207EA7DF69390BAE1E" import="1">Mapscripts/Arborea.lua</File>
     <File md5="D528028FBBA4F55BFF2401C61FA40AFD" import="1">Mapscripts/Boreal.lua</File>
+    <File md5="4732CBC7688BBF4070A0BE7CA9BC7EEB" import="1">Mapscripts/Snow_Globe.lua</File>
     <File md5="D6B136A610D4856420832C36E33F7D37" import="1">Mapscripts/Communitu_79a.lua</File>
     <File md5="CB525B04CD8CD589F22BD94E958DA337" import="1">Mapscripts/Continental_Drift.lua</File>
     <File md5="BAC3223369EB4F0F52A85368031DCBA8" import="1">Mapscripts/Europe.lua</File>
@@ -1703,6 +1704,10 @@
     <EntryPoint type="MapScript" file="Mapscripts/Boreal.lua">
       <Name>Boreal</Name>
       <Description>Boreal mapscript compatible with VP</Description>
+    </EntryPoint>
+    <EntryPoint type="MapScript" file="Mapscripts/Snow_Globe.lua">
+      <Name>Snow Globe</Name>
+      <Description>Snow Globe mapscript compatible with VP</Description>
     </EntryPoint>
     <EntryPoint type="MapScript" file="Mapscripts/Europe.lua">
       <Name>Europe</Name>

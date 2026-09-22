@@ -61,7 +61,7 @@
     <File md5="0FB1B222735AD9E10ECF49A22882AF45" import="1">LUA/TradeLogic.lua</File>
     <File md5="23FFEF0619E89F87FED6F82ACBBDEB70" import="1">LUA/UnitFlagManager.lua</File>
     <File md5="C9640C05F6EDAA4ADF5E67E5D17FC01A" import="1">LUA/UnitFlagManager.xml</File>
-    <File md5="D8F616359260727D37E4F830A74403F8" import="1">LUA/UnitPanel.lua</File>
+    <File md5="6C36610D7590C5E21C32BD90D6C86D86" import="1">LUA/UnitPanel.lua</File>
     <File md5="72BE225BBB8B757302AC7653198DA646" import="1">LUA/UnitPanel.xml</File>
     <File md5="BAEAE4CE4E8B8BEAA2267E1E89EB6D2E" import="1">LUA/UnitPanel_small.xml</File>
     <File md5="55909A9DD5774FA7137CAA99141A5D2B" import="0">ImprovedTopPanel/Text.xml</File>

@@ -1411,6 +1411,12 @@
       </Content>
       <Content>
         <Type>MapScript</Type>
+        <Name>Snow Globe</Name>
+        <Description>Snow Globe mapscript compatible with VP</Description>
+        <FileName>Mapscripts/Snow_Globe.lua</FileName>
+      </Content>
+      <Content>
+        <Type>MapScript</Type>
         <Name>Europe</Name>
         <Description>Europe mapscript compatible with VP</Description>
         <FileName>Mapscripts/Europe.lua</FileName>
@@ -7114,6 +7120,10 @@
       <ImportIntoVFS>True</ImportIntoVFS>
     </Content>
     <Content Include="Mapscripts\Boreal.lua">
+      <SubType>Lua</SubType>
+      <ImportIntoVFS>True</ImportIntoVFS>
+    </Content>
+    <Content Include="Mapscripts\Snow_Globe.lua">
       <SubType>Lua</SubType>
       <ImportIntoVFS>True</ImportIntoVFS>
     </Content>

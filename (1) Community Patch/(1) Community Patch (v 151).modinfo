@@ -56,7 +56,7 @@
     <File md5="AEE60C482823978F3CCFD48FE23F6867" import="1">Assets/Events/StockMarketCrash.dds</File>
     <File md5="4C0FA5BDC561A08771875B67938B484E" import="1">Assets/Events/SunHeat.dds</File>
     <File md5="CEFEE0208CFB5C2AFEEE3E4C3305E9B2" import="1">Assets/FontIcons/CommunityFontIconAtlas.dds</File>
-    <File md5="181A055FE4DC036F3677111447B9BC5A" import="1">Assets/FontIcons/CommunityFontIconAtlas.ggxml</File>
+    <File md5="D4CA743E814EEA794A4D20384BB96C0C" import="1">Assets/FontIcons/CommunityFontIconAtlas.ggxml</File>
     <File md5="D6A84377DC0A60D68C78E911777E9E88" import="1">Assets/GreatWorks/ancientchina.dds</File>
     <File md5="1154AB813A0500E7664C5894CEAFCB15" import="1">Assets/GreatWorks/ancientjapan.dds</File>
     <File md5="D437F09F6BF878F68FE10C0AB39725E5" import="1">Assets/GreatWorks/ancientpersia.dds</File>
@@ -573,7 +573,7 @@
     <File md5="37E48ED89CFEBAC31E1DFFCA1087CF4D" import="0">Database Changes/Concepts/CoreConceptChanges.sql</File>
     <File md5="5AFB377345571BA35644B7880D3CF0BC" import="0">Database Changes/Concepts/CoreNewConcepts.xml</File>
     <File md5="38862270A17CC8A2A8339A404BBA242B" import="0">Database Changes/Corporations/NewCorporationTables.xml</File>
-    <File md5="616CC81201B010E01635789B0CB87348" import="0">Database Changes/Defines/CoreDefineChanges.sql</File>
+    <File md5="A7871DC320BA6C3962A0C2736ECC1E62" import="0">Database Changes/Defines/CoreDefineChanges.sql</File>
     <File md5="38423CA4E92012D35A08858ABD75C49F" import="0">Database Changes/Defines/DiploApproachWeights.sql</File>
     <File md5="8D106B4818727BDA9923E99D5FF2BCEF" import="0">Database Changes/Defines/DiploOpinionWeights.sql</File>
     <File md5="90ED5D6EE6AE8620EA764EB0531CA72E" import="0">Database Changes/Difficulty/CoreDifficultyChanges.sql</File>
@@ -795,7 +795,7 @@
     <File md5="09F48361B9384916FE92B558BF89584A" import="1">LUA/TechTree.lua</File>
     <File md5="6F466E73E0A73EC3C95ACFCADC826D81" import="1">LUA/TechTree.xml</File>
     <File md5="E0AE662C54885CF86420CB814091F04A" import="1">LUA/TopPanel.lua</File>
-    <File md5="775E1F28E63969AC766BEC6FF269C46D" import="1">LUA/UnitPanel.lua</File>
+    <File md5="C0BE5315019065B17378F9343050FB6E" import="1">LUA/UnitPanel.lua</File>
     <File md5="B3F04071E64112CAE79DBF97340A6A9A" import="1">LUA/Includes/CityStateStatusHelper.lua</File>
     <File md5="3EEC34EC93897595AABD4367C8B4B1A9" import="1">Mapscripts/Boreal.lua</File>
     <File md5="C94DD0DDF8E82E5B09B728BD7FCD951A" import="1">Mapscripts/Highlands.lua</File>
