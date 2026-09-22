@@ -3967,8 +3967,11 @@ void CvEconomicAI::DisbandUnitsToFreeSpaceshipResources()
 			int iLoopCity = 0;
 			for (CvCity* pLoopCity = m_pPlayer->firstCity(&iLoopCity); pLoopCity != NULL; pLoopCity = m_pPlayer->nextCity(&iLoopCity))
 			{
+			
+				// Allow selling in puppet or resisting or damaged cities. NoAnnex can only sell in capital.
 				// can't sell anything in this city?
-				if (pLoopCity->IsPuppet() || pLoopCity->IsResistance() || pLoopCity->getDamage() > 0 || pLoopCity->GetCityBuildings()->IsSoldBuildingThisTurn() || m_pPlayer->GetPlayerTraits()->IsNoAnnexing())
+				// if (pLoopCity->IsPuppet() || pLoopCity->IsResistance() || pLoopCity->getDamage() > 0 || pLoopCity->GetCityBuildings()->IsSoldBuildingThisTurn() || m_pPlayer->GetPlayerTraits()->IsNoAnnexing())
+				if (m_pPlayer->GetPlayerTraits()->IsNoAnnexing())
 					continue;
 
 				int iWeight = pLoopCity->getEconomicValue(m_pPlayer->GetID());

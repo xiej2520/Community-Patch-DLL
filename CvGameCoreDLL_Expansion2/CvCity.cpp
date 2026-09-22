@@ -15508,7 +15508,9 @@ void CvCity::ChangeBuildingPurchaseCooldown(int iValue)
 void CvCity::DoSellBuilding()
 {
 	// Can't sell anything?
-	if (IsResistance() || getDamage() > 0 || GetCityBuildings()->IsSoldBuildingThisTurn() || GET_PLAYER(getOwner()).GetPlayerTraits()->IsNoAnnexing())
+	// Allow selling in resisting or damaged cities, multiple buildings a turn.
+	//if (IsResistance() || getDamage() > 0 || GetCityBuildings()->IsSoldBuildingThisTurn() || GET_PLAYER(getOwner()).GetPlayerTraits()->IsNoAnnexing())
+	if (GET_PLAYER(getOwner()).GetPlayerTraits()->IsNoAnnexing())
 		return;
 
 	int iBestRefund = 0;

@@ -5651,20 +5651,21 @@ int CvCityBuildings::GetNumActiveBuilding(BuildingTypes eIndex) const
 /// Is the player allowed to sell building eIndex in this city?
 bool CvCityBuildings::IsBuildingSellable(const CvBuildingEntry& kBuilding) const
 {
-	if (m_pCity->IsResistance())
-		return false;
+	// Allow selling in resisting cities
+	//if (m_pCity->IsResistance())
+	//	return false;
 
-	// Can't sell more than one building per turn
-	if(IsSoldBuildingThisTurn())
-		return false;
+	// Allow selling more than one building per turn
+	//if(IsSoldBuildingThisTurn())
+	//	return false;
 
 	// Venice can't sell any buildings except in their capital (check is needed because Venice can raze cities)
 	if (!m_pCity->isCapital() && GET_PLAYER(m_pCity->getOwner()).GetPlayerTraits()->IsNoAnnexing())
 		return false;
 
-	// Can't sell in puppet cities
-	if (m_pCity->IsPuppet())
-		return false;
+	// Allow selling in puppet cities
+	//if (m_pCity->IsPuppet())
+	//	return false;
 
 	// Can't sell a building if it doesn't cost us anything (no exploits)
 	if(kBuilding.GetGoldMaintenance() <= 0)
@@ -5675,8 +5676,9 @@ bool CvCityBuildings::IsBuildingSellable(const CvBuildingEntry& kBuilding) const
 		return false;
 
 	// prevent exploits - can't sell in damaged cities
-	if (m_pCity->getDamage() > 0)
-		return false;
+	// Allow selling, don't cheese please
+	//if (m_pCity->getDamage() > 0)
+	//	return false;
 
 	//Spawns a permanent resource? Can't sell.
 	if(kBuilding.GrantsRandomResourceTerritory())
