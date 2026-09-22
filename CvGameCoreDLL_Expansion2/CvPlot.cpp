@@ -3307,16 +3307,17 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 			}
 		}
 
-		//can't build roads in enemy territory and saddle them with the maintenance
-		if (getOwner() != NO_PLAYER && ePlayer != NO_PLAYER)
-		{
-			CvPlayer& kOwner = GET_PLAYER(getOwner());
-			if (kOwner.isMajorCiv() && kOwner.getTeam() != GET_PLAYER(ePlayer).getTeam())
-			{
-				if (!GET_TEAM(kOwner.getTeam()).IsVassal(GET_PLAYER(ePlayer).getTeam()))
-					return false;
-			}
-		}
+		// Allow routes to be built in enemy territory for unit movement during wars.
+		// Please don't cheese and saddle enemies with maintenance.
+		//if (getOwner() != NO_PLAYER && ePlayer != NO_PLAYER)
+		//{
+		//	CvPlayer& kOwner = GET_PLAYER(getOwner());
+		//	if (kOwner.isMajorCiv() && kOwner.getTeam() != GET_PLAYER(ePlayer).getTeam())
+		//	{
+		//		if (!GET_TEAM(kOwner.getTeam()).IsVassal(GET_PLAYER(ePlayer).getTeam()))
+		//			return false;
+		//	}
+		//}
 
 		bValid = true;
 	}
