@@ -11,6 +11,12 @@
 		<Row Tag="TXT_KEY_MAP_BOREAL_VP">
 			<Text>Boreal for VP</Text>
 		</Row>
+		<Row Tag="TXT_KEY_MAP_SNOW_GLOBE_VP">
+			<Text>Snow Globe for VP</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MAP_SNOW_GLOBE_HELP">
+			<Text>An Ice Age-style map with snow covering all land. Strategic resources are concentrated in the northern and southern 20% of the map.</Text>
+		</Row>
 		<Row Tag="TXT_KEY_MAP_EUROPE_VP">
 			<Text>Europe for VP</Text>
 		</Row>
