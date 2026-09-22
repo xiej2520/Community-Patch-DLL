@@ -10797,35 +10797,39 @@ void CvMinorCivAI::DoUpdateAlliesResourceBonus(PlayerTypes eNewAlly, PlayerTypes
 			
 			if (bNeedsUpdate)
 			{
-				// Someone is losing the bonus
+				// Remove the old export from the source first. The ally cache is
+				// rebuilt below, so a stale cache cannot underflow during this step.
 				if (eOldAlly != NO_PLAYER)
 				{
 					int iResourceQuantity = GetPlayer()->getResourceExport(eResource);
 
 					if (iResourceQuantity > 0)
 					{
-						GET_PLAYER(eOldAlly).changeResourceFromMinors(eResource, -iResourceQuantity);
 						GetPlayer()->changeResourceExport(eResource, -iResourceQuantity);
 					}
 				}
 
-				// Someone new is getting the bonus
+				// Add the current local quantity to the new export, if visible.
 				if (eNewAlly != NO_PLAYER)
 				{
-					if (!GET_PLAYER(eNewAlly).IsResourceRevealed(eResource))
-						continue;
-
-					int iResourceQuantity = GetPlayer()->getNumResourceTotal(eResource);
-
-					if (iResourceQuantity > 0)
+					if (GET_PLAYER(eNewAlly).IsResourceRevealed(eResource))
 					{
-						GET_PLAYER(eNewAlly).changeResourceFromMinors(eResource, iResourceQuantity);
-						GetPlayer()->changeResourceExport(eResource, iResourceQuantity);
+						int iResourceQuantity = GetPlayer()->getNumResourceTotal(eResource);
+						if (iResourceQuantity > 0)
+							GetPlayer()->changeResourceExport(eResource, iResourceQuantity);
 					}
 				}
 			}
 		}
 	}
+
+	// Rebuild the affected aggregate caches from the current city-state state.
+	// This makes ally changes, tech reveals, and city captures idempotent even
+	// when a save contains an out-of-date incremental cache.
+	if (eNewAlly != NO_PLAYER)
+		GET_PLAYER(eNewAlly).RecalculateResourcesFromMinors();
+	if (eOldAlly != NO_PLAYER && eOldAlly != eNewAlly)
+		GET_PLAYER(eOldAlly).RecalculateResourcesFromMinors();
 }
 
 /// The most Friendship (effective, not base) any player has with this Minor

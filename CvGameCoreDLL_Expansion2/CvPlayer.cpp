@@ -2911,11 +2911,25 @@ CvPlot* CvPlayer::addFreeUnit(UnitTypes eUnit, bool bGameStart, UnitAITypes eUni
 
 CvCity* CvPlayer::initCity(int iX, int iY, bool bBumpUnits, bool bInitialFounding, ReligionTypes eInitialReligion, const char* szName, CvUnit* pkSettler)
 {
+	// Do not create an unlinked city when a malformed save leaves the
+	// destination plot marked as a city but GetPlotCity() cannot resolve it.
+	CvPlot* pPlot = GC.getMap().plot(iX, iY);
+	if (pPlot == NULL)
+	{
+		ASSERT(false, "Cannot initialize a city on an invalid plot");
+		return NULL;
+	}
+	if (pPlot->isCity())
+	{
+		ASSERT(false, "Cannot initialize a city on a plot already marked as a city");
+		return NULL;
+	}
+
 	CvCity* pNewCity = addCity();
 	ASSERT(pNewCity != NULL, "City is not assigned a valid value");
 	if(pNewCity != NULL)
 	{
-		ASSERT(!(GC.getMap().plot(iX, iY)->isCity()), "No city is expected at this plot when initializing new city");
+		ASSERT(!pPlot->isCity(), "No city is expected at this plot when initializing new city");
 		pNewCity->init(pNewCity->GetID(), GetID(), iX, iY, bBumpUnits, bInitialFounding, eInitialReligion, szName, pkSettler);
 		pNewCity->GetCityStrategyAI()->UpdateFlavorsForNewCity();
 		pNewCity->DoUpdateCheapestPlotInfluenceDistance();
@@ -39747,14 +39761,62 @@ void CvPlayer::changeResourceFromMinors(ResourceTypes eIndex, int iChange)
 
 	if(iChange != 0)
 	{
-		m_paiResourceFromMinors[eIndex] = m_paiResourceFromMinors[eIndex] + iChange;
+		const int iNewResourceQuantity = m_paiResourceFromMinors[eIndex] + iChange;
+		const bool bCacheUnderflowed = iNewResourceQuantity < 0;
+		m_paiResourceFromMinors[eIndex] = max(0, iNewResourceQuantity);
 		ASSERT(getResourceFromMinors(eIndex) >= 0);
+		if (bCacheUnderflowed)
+			RecalculateResourcesFromMinors();
 
 		CalculateNetHappiness();
 		UpdateNumStrategicResourcesFromMinors();
 
 		if (IsCSResourcesCountMonopolies())
 			CheckForMonopoly(eIndex);
+	}
+}
+
+void CvPlayer::RecalculateResourcesFromMinors()
+{
+	for (int iResourceLoop = 0; iResourceLoop < GC.getNumResourceInfos(); iResourceLoop++)
+	{
+		ResourceTypes eResource = (ResourceTypes)iResourceLoop;
+		const CvResourceInfo* pResourceInfo = GC.getResourceInfo(eResource);
+		if (!pResourceInfo || (pResourceInfo->getResourceUsage() != RESOURCEUSAGE_STRATEGIC && pResourceInfo->getResourceUsage() != RESOURCEUSAGE_LUXURY))
+			continue;
+
+		int iResourceQuantity = 0;
+		if (isMajorCiv() && IsResourceRevealed(eResource))
+		{
+			for (int iMinorLoop = MAX_MAJOR_CIVS; iMinorLoop < MAX_CIV_PLAYERS; iMinorLoop++)
+			{
+				CvPlayer& kMinor = GET_PLAYER((PlayerTypes)iMinorLoop);
+				if (!kMinor.isAlive() || !kMinor.isMinorCiv() || kMinor.GetMinorCivAI()->GetAlly() != GetID())
+					continue;
+
+				// getNumResourceTotal(false) excludes imports but still subtracts exports.
+				// Add the export back to recover the city-state's actual local quantity.
+				int iMinorResourceQuantity = kMinor.getNumResourceTotal(eResource, false) + kMinor.getResourceExport(eResource);
+				if (iMinorResourceQuantity > 0)
+					iResourceQuantity += iMinorResourceQuantity;
+			}
+		}
+
+		m_paiResourceFromMinors[eResource] = iResourceQuantity;
+	}
+
+	UpdateNumStrategicResourcesFromMinors();
+	CalculateNetHappiness();
+
+	if (IsCSResourcesCountMonopolies())
+	{
+		for (int iResourceLoop = 0; iResourceLoop < GC.getNumResourceInfos(); iResourceLoop++)
+		{
+			ResourceTypes eResource = (ResourceTypes)iResourceLoop;
+			const CvResourceInfo* pResourceInfo = GC.getResourceInfo(eResource);
+			if (pResourceInfo && (pResourceInfo->getResourceUsage() == RESOURCEUSAGE_STRATEGIC || pResourceInfo->getResourceUsage() == RESOURCEUSAGE_LUXURY))
+				CheckForMonopoly(eResource);
+		}
 	}
 }
 

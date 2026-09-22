@@ -47,10 +47,10 @@
   <Blocks />
   <Files>
     <File md5="38ABCF62E09FE2CEF233F54B9D49D272" import="1">IGE_API_All.lua</File>
-    <File md5="5FA888682CBD625AB88D71D7F1821B9D" import="1">IGE_API_Data.lua</File>
+    <File md5="986060848CF2A3DE89866232A740AD57" import="1">IGE_API_Data.lua</File>
     <File md5="26D9A2438987B90C4191673C91B1775A" import="1">IGE_API_Misc.lua</File>
     <File md5="0F7F2220EBE67BAAD5C3838366C94EFB" import="1">IGE_API_Rivers.lua</File>
-    <File md5="5C50A78571DA1CC1E28427385626D982" import="1">IGE_API_Terrain.lua</File>
+    <File md5="D9620CDF973A1595FB6D3F5569C6BB89" import="1">IGE_API_Terrain.lua</File>
     <File md5="0F52577B1BD6F115B2CC100B5265ED61" import="1">IGE_API_UI.lua</File>
     <File md5="5546BD6748DFC7CBD59F6239D90CDB57" import="1">IGE_Controller_All.lua</File>
     <File md5="3A2442A00874833DDDB7EF136D0B9CB1" import="1">IGE_Controller_All.xml</File>
@@ -95,7 +95,7 @@
     <File md5="78DFF4F20880AA709190EB062CB38CCA" import="1">BulkUI/IGE_ChoosePantheonPopup.xml</File>
     <File md5="C6F324D5805FE532CFAA2A38B448189F" import="1">BulkUI/IGE_ChooseReligionPopup.lua</File>
     <File md5="6E67F8A3B28E03BA34EF5C083CE171C5" import="1">BulkUI/IGE_ChooseReligionPopup.xml</File>
-    <File md5="4084706D9BB0B3D2DF46302021A9744F" import="1">BulkUI/IGE_CityBanner.lua</File>
+    <File md5="F4E1E3F4567774A90B66D923B0F3D49F" import="1">BulkUI/IGE_CityBanner.lua</File>
     <File md5="C0BCA20D49742AA531AC180AE644B9EB" import="1">BulkUI/IGE_CityBanner.xml</File>
     <File md5="EFCBECDE7AA1FB113C02579DE66171F8" import="1">BulkUI/IGE_MiniMap.lua</File>
     <File md5="C83CE2259C5BCDBC8C4109934578D956" import="1">BulkUI/IGE_MiniMap.xml</File>
@@ -120,7 +120,7 @@
     <File md5="06524D3CB7FCB78DE7A3B4D43CA287BD" import="0">Localization/IGE_ZH_CN.xml</File>
     <File md5="A9EDAB8CAFC36B9FCACC79E7AC0757A9" import="1">Panels/IGE_ActivePlayerSelection.lua</File>
     <File md5="D35E3E5AFE54E4B466BDF5EC472A3B7F" import="1">Panels/IGE_ActivePlayerSelection.xml</File>
-    <File md5="3A4B391A4432B86F6A4F0862EA180D00" import="1">Panels/IGE_CitiesPanel.lua</File>
+    <File md5="3F4416CF0D1BD25F51A622B8A9F18A3D" import="1">Panels/IGE_CitiesPanel.lua</File>
     <File md5="966E72FB6BE1EE3EB69B76DA1B0E2465" import="1">Panels/IGE_CitiesPanel.xml</File>
     <File md5="A33D50EA568B5DFBDC4BFD2BEC5EC7A4" import="1">Panels/IGE_PlayersPanel.lua</File>
     <File md5="3F38B74B9FC96D1C78DCE48500D7DDC0" import="1">Panels/IGE_PlayersPanel.xml</File>

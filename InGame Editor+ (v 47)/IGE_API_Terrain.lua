@@ -215,6 +215,29 @@ end
 --===============================================================================================
 -- COMPATIBILITY CHECKS
 --===============================================================================================
+local function HasCity(plot)
+	-- IsCity() also catches a stale city flag when the city object has already
+	-- become unreachable. Do not let terrain painting make that state worse.
+	return plot and (plot:IsCity() or plot:GetPlotCity() ~= nil);
+end
+
+-------------------------------------------------------------------------------------------------
+local function IsWaterTerrain(terrain)
+	return terrain.water == true
+		or terrain.ID == TerrainTypes.TERRAIN_COAST
+		or terrain.ID == TerrainTypes.TERRAIN_OCEAN;
+end
+
+-------------------------------------------------------------------------------------------------
+local function RejectCityPlotChange(plot)
+	if HasCity(plot) then
+		LuaEvents.IGE_FloatingMessage(L("TXT_KEY_IGE_CITY_ON_PLOT"));
+		return true;
+	end
+	return false;
+end
+
+-------------------------------------------------------------------------------------------------
 local function MatchValidTerrainsAndFeatures(item, terrainID, featureID)
 	-- Scroll through valid features compatible with the current terrain
 	for _, feature in pairs(item.validFeatures) do
@@ -256,6 +279,10 @@ end
 
 -------------------------------------------------------------------------------------------------
 function CanHaveTerrain(plot, terrain)
+	if IsWaterTerrain(terrain) and HasCity(plot) then
+		return false;
+	end
+
 	-- Oceans only for coastal lands.
 	if terrain.ID == TerrainTypes.TERRAIN_OCEAN then
 		return CanBeOcean(plot);
@@ -386,9 +413,14 @@ end
 -------------------------------------------------------------------------------------------------
 function SetTerrain(terrain, plot)
 	if plot then
+		local isWaterTerrain = IsWaterTerrain(terrain);
+		if isWaterTerrain and RejectCityPlotChange(plot) then
+			return false;
+		end
+
 		-- Want to set coast ? 
 		if terrain.ID ~= plot:GetTerrainType() then
-			if terrain.water then
+			if isWaterTerrain then
 				plot:SetPlotType(PlotTypes.PLOT_OCEAN);
 			elseif plot:GetPlotType() == PlotTypes.PLOT_OCEAN then
 				plot:SetPlotType(PlotTypes.PLOT_LAND);
@@ -409,7 +441,11 @@ end
 
 -------------------------------------------------------------------------------------------------
 function SetPlotType(type, plot)
-	if plot and plot:GetPlotType() ~= type then
+	if plot and plot:GetPlotType() ~= type.type then
+		if type.type == PlotTypes.PLOT_OCEAN and RejectCityPlotChange(plot) then
+			return false;
+		end
+
 		plot:SetPlotType(type.type);
 		plot:SetArea(-1)
 		CheckConsistency(plot)
@@ -425,6 +461,12 @@ end
 -------------------------------------------------------------------------------------------------
 function SetFeature(feature, plot)
 	if plot and plot:GetFeatureType() ~= feature.ID then
+		-- Some natural wonders change the plot to water before setting the
+		-- feature. Never let painting a feature delete a city as a side effect.
+		if RejectCityPlotChange(plot) then
+			return false;
+		end
+
 		local terrainType = plot:GetTerrainType();
 		local isOcean = plot:IsWater() and not plot:IsLake();
 
@@ -635,7 +677,13 @@ end
 
 -------------------------------------------------------------------------------------------------
 function SetResource(resource, plot)
-	if plot and (plot:GetResourceType() ~= resource.ID or plot:GetNumResource() ~= resource.qty) then
+	-- Changing a resource on a city plot can invalidate the city's cached plot
+	-- state and leave the city banner pointing at a dead city object.  Keep the
+	-- editor from creating that state; resources can still be changed normally
+	-- everywhere else.
+	if plot and RejectCityPlotChange(plot) then
+		return false;
+	elseif plot and (plot:GetResourceType() ~= resource.ID or plot:GetNumResource() ~= resource.qty) then
 		plot:SetResourceType(resource.ID, resource.qty);
 		plot:SetNumResource(resource.qty);
 		return true, true
@@ -644,7 +692,9 @@ end
 
 -------------------------------------------------------------------------------------------------
 function SetResourceQty(qty, plot)
-	if plot and plot:GetNumResource() ~= qty then
+	if plot and RejectCityPlotChange(plot) then
+		return false;
+	elseif plot and plot:GetNumResource() ~= qty then
 		plot:SetNumResource(qty);
 		return true, true
 	end

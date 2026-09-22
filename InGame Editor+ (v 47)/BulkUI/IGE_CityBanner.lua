@@ -169,6 +169,10 @@ end
 
 -------------------------------------------------------------------------------------------------
 local function UpdateCityBanner(city)
+	if not city then
+		return;
+	end
+
 	local ID = playerStride * city:GetOwner() + city:GetID();
 	local iActiveTeam = Players[iActivePlayer]:GetTeam();
 	local owner = Players[city:GetOwner()];
@@ -482,9 +486,11 @@ end
 -- EVENTS
 --===============================================================================================
 function OnCityCreated(hexPos)
-    local gridPosX, gridPosY = ToGridFromHex(hexPos.x, hexPos.y);
+	local gridPosX, gridPosY = ToGridFromHex(hexPos.x, hexPos.y);
 	local plot = Map.GetPlot(gridPosX, gridPosY);
-	UpdateCityBanner(plot:GetPlotCity());
+	if plot then
+		UpdateCityBanner(plot:GetPlotCity());
+	end
 end
 
 -------------------------------------------------------------------------------------------------
@@ -492,7 +498,9 @@ function OnCityDestroyed(hexPos, playerID, cityID, newPlayerID)
 	print("OnCityDestroyed:", tostring(playerID), tostring(cityID), tostring(newPlayerID))
 	local ID = playerStride * playerID + cityID;
 	local instance = instances[ID];
-	cityManager:ReleaseInstance(instance);
+	if instance then
+		cityManager:ReleaseInstance(instance);
+	end
 	instances[ID] = nil;
 end
 
@@ -500,14 +508,22 @@ end
 function OnCitySetDamage(iPlayerID, iCityID, iDamage, iPreviousDamage)
 	local ID = playerStride * iPlayerID + iCityID;
 	local instance = instances[ID];
-	RefreshCityDamage(instance, iDamage);
+	if instance then
+		RefreshCityDamage(instance, iDamage);
+	end
 end
 
 -------------------------------------------------------------------------------------------------
 function OnSpecificCityInfoDirty(iPlayerID, iCityID, eUpdateType)
 	local player = Players[iPlayerID];
-	local city = player:GetCityByID(iCityID);
-	UpdateCityBanner(city);
+	if player then
+		local city = player:GetCityByID(iCityID);
+		if city then
+			UpdateCityBanner(city);
+		else
+			OnCityDestroyed(nil, iPlayerID, iCityID, -1);
+		end
+	end
 end
 
 -------------------------------------------------------------------------------------------------

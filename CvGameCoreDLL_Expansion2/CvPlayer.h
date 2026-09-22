@@ -2216,6 +2216,7 @@ public:
 
 	int getResourceFromMinors(ResourceTypes eIndex) const;
 	void changeResourceFromMinors(ResourceTypes eIndex, int iChange);
+	void RecalculateResourcesFromMinors();
 
 	int GetNumStrategicResourcesFromMinors() const;
 	void UpdateNumStrategicResourcesFromMinors();
