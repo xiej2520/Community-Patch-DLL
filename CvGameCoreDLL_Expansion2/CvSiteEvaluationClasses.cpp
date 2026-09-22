@@ -78,6 +78,13 @@ bool CvCitySiteEvaluator::CanFoundCity(const CvPlot* pPlot, const CvPlayer* pPla
 		return false;
 	}
 
+	// A city plot is never a valid founding site. This also rejects a stale
+	// city flag before the caller reaches CvPlayer::initCity.
+	if (pPlot->isCity())
+	{
+		return false;
+	}
+
 	// Used to check if plot was valid for moving. 
 	// Now should always be gated behind a unit call with this check at the unit level
 	
@@ -101,13 +108,13 @@ bool CvCitySiteEvaluator::CanFoundCity(const CvPlot* pPlot, const CvPlayer* pPla
 			return false;
 		}
 
-		if(pPlot->IsAdjacentOwnedByTeamOtherThan(pPlayer->getTeam()))
+		// Settling next to another team's territory is allowed. Players with the
+		// BorderSettle ability will culture bomb adjacent plots, so retain the AI
+		// diplomacy safeguard for that special case.
+		if(pPlayer->IsBorderSettle() && pPlot->IsAdjacentOwnedByTeamOtherThan(pPlayer->getTeam()))
 		{
-			// not allowed unless player has special permission (will cause culture bomb)
-			if (!pPlayer->IsBorderSettle())
-				return false;
-			// do not allow AI to culture bomb people they want to be friends with
-			else if (!pPlayer->isHuman(ISHUMAN_AI_DIPLOMACY) && pPlayer->isMajorCiv())
+			// Do not allow AI to culture bomb people they want to be friends with.
+			if (!pPlayer->isHuman(ISHUMAN_AI_DIPLOMACY) && pPlayer->isMajorCiv())
 			{
 				// assume only a 1 tile culture bomb
 				for (int iK = 0; iK < RING_PLOTS[1]; iK++)
