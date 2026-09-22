@@ -101,9 +101,10 @@ WHERE Type = 'IMPROVEMENT_FORT';
 
 -- Citadel
 
--- can no longer be built in foreign territory by default
 UPDATE Improvements
-SET InEnemyTerritory = 0
+SET
+	InEnemyTerritory = 1,
+	InAdjacentFriendly = 1
 WHERE Type = 'IMPROVEMENT_CITADEL';
 
 INSERT INTO Improvement_Yields
