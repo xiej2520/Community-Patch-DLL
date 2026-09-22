@@ -202,7 +202,9 @@ function SetTerrainsData(data)
 		item.ID = row.ID
 		item.name = name
 		item.type = row.Type
-		item.water = row.Water
+		-- Civ V's database bindings may expose BOOLEAN columns as 0/1. In Lua,
+		-- numeric 0 is truthy, so normalize this before SetTerrain uses it.
+		item.water = (row.Water == true or row.Water == 1 or row.Water == "1")
 		item.condition = "TerrainType = '" .. row.Type .. "'";
 		item.action = SetTerrain;
 		item.showYieldMod = true;

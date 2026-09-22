@@ -878,7 +878,7 @@ function OnPlop(button, plot)
 		isTeleporting = false;
 		OnUpdate();
 	else
-		if plot:GetPlotCity() == nil then
+		if plot:GetPlotCity() == nil and not plot:IsCity() then
 			IGE.currentPlayer:InitCity(plot:GetX(), plot:GetY());
 			Events.SerialEventGameDataDirty();
 		end

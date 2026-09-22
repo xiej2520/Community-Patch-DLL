@@ -70,6 +70,7 @@ clang-output/
 #ignore local MSVC/Wine toolchain experiments and generated build artifacts
 /msvc-build/
 /.vp-wine-*/
+/.vp-link-help-prefix-*/
 /.vp-msvc-test/
 __pycache__/
 *.pyc
