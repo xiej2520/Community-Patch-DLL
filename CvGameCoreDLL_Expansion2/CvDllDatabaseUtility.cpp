@@ -409,6 +409,8 @@ bool CvDllDatabaseUtility::PrefetchGameData()
 		const int iNumFlavors = kUtility.MaxRows("Flavors");
 		//GC.getNumFlavorTypes() = iNumFlavors;
 		GC.setNumFlavorTypes(iNumFlavors);
+		//the game database can be cached more than once per process, so drop the previous array first
+		SAFE_DELETE_ARRAY(paFlavors);
 		paFlavors = FNEW(CvString[iNumFlavors], c_eCiv5GameplayDLL, 0);
 
 		Database::Results kResults;
