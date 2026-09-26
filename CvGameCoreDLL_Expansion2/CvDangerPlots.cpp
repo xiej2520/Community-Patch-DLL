@@ -123,6 +123,12 @@ void CvDangerPlots::UpdateDanger()
 
 	//note: we do not do a dirty check here, that is done in GetDanger()
 
+	//dead players never query danger plots, and a map sized grid per dead slot is a lot of
+	//memory to hold on to. every reader treats an empty grid as "no danger", and the grid is
+	//rebuilt on demand if the player is revived.
+	if (m_ePlayer == NO_PLAYER || !GET_PLAYER(m_ePlayer).isAlive())
+		return;
+
 	//allocate on demand
 	if (m_DangerPlots.empty())
 	{
