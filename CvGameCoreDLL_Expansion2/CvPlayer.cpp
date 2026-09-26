@@ -45980,6 +45980,8 @@ void CvPlayer::Read(FDataStream& kStream)
 
 	if (MOD_WH_MILITARY_LOG && isHuman()) //Not serialized so shouldn't have any effect on savegames
 	{
+		//init() already created one for this player, so drop it before replacing it
+		SAFE_DELETE(m_pMilitaryLog);
 		m_pMilitaryLog = FNEW(CvEventLog, c_eCiv5GameplayDLL, 0);
 		m_pMilitaryLog->Init(GetID());
 	}
