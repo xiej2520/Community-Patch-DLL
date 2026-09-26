@@ -3023,8 +3023,21 @@ void CvMap::ExportUnitKillCount(PlayerTypes ePlayer)
 void CvMap::DoKillCountDecay(float fDecayFactor)
 {
 	for (UnitKillCount::iterator itPlayer = killCount.begin(); itPlayer != killCount.end(); ++itPlayer)
-		for (UnitKillCount::value_type::second_type::iterator itPlot = itPlayer->second.begin(); itPlot != itPlayer->second.end(); ++itPlot)
+	{
+		std::map<int, int>& kPlotCounts = itPlayer->second;
+
+		for (std::map<int, int>::iterator itPlot = kPlotCounts.begin(); itPlot != kPlotCounts.end();)
+		{
 			itPlot->second = int(itPlot->second*fDecayFactor);
+
+			//decay eventually reaches zero, at which point the entry carries no information
+			//(GetUnitKillCount returns 0 for a missing plot) but would stay in the map forever
+			if (itPlot->second == 0)
+				kPlotCounts.erase(itPlot++);
+			else
+				++itPlot;
+		}
+	}
 }
 
 void CvMap::LineOfSightChanged(const CvPlot* pPlot)
