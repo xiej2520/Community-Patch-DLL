@@ -2032,6 +2032,11 @@ void CvMap::calculateAreas()
 			pLog->Msg(CvString::format("%03d,%03d,%d,%d,%d\n",
 				pPlot->getX(), pPlot->getY(), pPlot->getTerrainType(), pPlot->getFeatureType(), pPlot->getArea()).c_str());
 		}
+
+		pLog->Close();
+		//the call counter is part of the file name, so this log is never requested again.
+		//without this the manager keeps it, and its grown write buffer, until shutdown.
+		LOGFILEMGR.DeleteLog(pLog);
 	}
 #endif
 }
