@@ -161,11 +161,12 @@ void CvReplayInfo::createInfo()
 					uiDataSet = m_dataSetMap.size() - 1;
 				}
 
-				TurnData turnData;
+				//fill the destination in place: building a temporary and assigning it copies
+				//the whole per turn history again, doubling peak memory while saving
+				TurnData& turnData = dataSet[uiDataSet];
+				turnData.clear();
 				for(CvPlayer::TurnData::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
 					turnData[it2->first - m_iInitialTurn] = it2->second;
-
-				dataSet[uiDataSet] = turnData;
 			}
 
 			m_listPlayerDataSets.push_back(dataSet);
