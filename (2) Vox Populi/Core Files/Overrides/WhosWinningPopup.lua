@@ -89,7 +89,7 @@ function OnPopup( popupInfo )
 	
 	print("Number of dudes to roll from: " .. #g_tListOfDudes);
 	
-	local iRand = Game.Rand(#g_tListOfDudes, "Rolling to determine Progress Screen dude.");
+	local iRand = math.random(#g_tListOfDudes) - 1; -- Game.Rand advances the synchronized RNG, which this UI code must not touch
 	iRand = iRand + 1;	-- Screw you, Lua
 	local strDudesName = g_tListOfDudes[iRand];
 	
@@ -109,7 +109,7 @@ function OnPopup( popupInfo )
 	while iRand == g_iLastListMode or bInvalid do
 		bInvalid = false;
 		
-		iRand = Game.Rand(#g_tListModeText+1, "Rolling to determine Progress Screen list type.");
+		iRand = math.random(#g_tListModeText+1) - 1; -- keep the UI off the synchronized RNG, see above
 		
 		-- Some modes aren't valid (e.g. wonders before anyone's built any)
 		if (not IsListModeAllowed(iRand)) then
