@@ -7580,6 +7580,7 @@ void CvGlobals::deleteInfoArrays()
 	deleteInfoArray(m_paUnitDomainInfo);
 
 	SAFE_DELETE_ARRAY(GC.getFootstepAudioTags());
+	SAFE_DELETE_ARRAY(GC.getFlavorTypes());
 
 	deleteInfoArray(m_paEntityEventInfo);
 }
