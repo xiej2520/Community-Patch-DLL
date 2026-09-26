@@ -2730,6 +2730,26 @@ LONG WINAPI CustomFilter(EXCEPTION_POINTERS* ExceptionInfo)
 	byte* largestFreeBlockBase = 0;
 	size_t largestFreeBlockSize = 0;
 
+	//Composition of the committed address space. The markers above only say how full the
+	//process is; they cannot say what filled it, which is what a memory exhaustion report
+	//needs. The same scan therefore also breaks committed memory down by region type
+	//(private heap vs mapped data vs loaded images) and by region size, and keeps the
+	//largest regions. Everything here is fixed size and stack allocated on purpose: this
+	//runs inside the crash filter, where an allocation would compete with the last of the
+	//address space.
+	enum { MEMORY_TYPE_PRIVATE = 0, MEMORY_TYPE_MAPPED = 1, MEMORY_TYPE_IMAGE = 2, MEMORY_TYPE_OTHER = 3, MEMORY_TYPE_COUNT = 4 };
+	enum { MEMORY_SIZE_BUCKETS = 6, MAX_LARGEST_COMMITTED_REGIONS = 10 };
+
+	size_t aCommittedByType[MEMORY_TYPE_COUNT] = { 0, 0, 0, 0 };
+	size_t aCommittedLowByType[MEMORY_TYPE_COUNT] = { 0, 0, 0, 0 };
+	size_t aCommittedRegionsByType[MEMORY_TYPE_COUNT] = { 0, 0, 0, 0 };
+	size_t aCommittedBySize[MEMORY_SIZE_BUCKETS] = { 0, 0, 0, 0, 0, 0 };
+	size_t aCommittedRegionsBySize[MEMORY_SIZE_BUCKETS] = { 0, 0, 0, 0, 0, 0 };
+	struct SLargestCommittedRegion { const byte* pBase; size_t uiSize; size_t uiLowSize; DWORD uiProtect; DWORD uiType; const byte* pAllocBase; };
+	SLargestCommittedRegion aLargestCommittedRegions[MAX_LARGEST_COMMITTED_REGIONS];
+	ZeroMemory(aLargestCommittedRegions, sizeof(aLargestCommittedRegions));
+	size_t uiLargestCommittedCount = 0;
+
 	{
 		SYSTEM_INFO si;
 		GetSystemInfo(&si);
@@ -2756,6 +2776,40 @@ LONG WINAPI CustomFilter(EXCEPTION_POINTERS* ExceptionInfo)
 			{
 				committedMemory += mInfo.RegionSize;
 				committedMemoryLow += adjSize;
+
+				const int iType = (mInfo.Type == MEM_PRIVATE) ? MEMORY_TYPE_PRIVATE
+				                : (mInfo.Type == MEM_MAPPED) ? MEMORY_TYPE_MAPPED
+				                : (mInfo.Type == MEM_IMAGE) ? MEMORY_TYPE_IMAGE : MEMORY_TYPE_OTHER;
+				aCommittedByType[iType] += mInfo.RegionSize;
+				aCommittedLowByType[iType] += adjSize;
+				aCommittedRegionsByType[iType]++;
+
+				//bucket by region size: when an 8 KB allocation fails with 20 MB "free", the
+				//size distribution matters as much as the total
+				const size_t uiCommittedSize = mInfo.RegionSize;
+				const int iBucket = (uiCommittedSize >= (16u << 20)) ? 5
+				                  : (uiCommittedSize >= (1u << 20)) ? 4
+				                  : (uiCommittedSize >= (256u << 10)) ? 3
+				                  : (uiCommittedSize >= (64u << 10)) ? 2
+				                  : (uiCommittedSize >= (16u << 10)) ? 1 : 0;
+				aCommittedBySize[iBucket] += uiCommittedSize;
+				aCommittedRegionsBySize[iBucket]++;
+
+				//keep the largest committed regions, insertion sorted into a fixed array
+				if (uiLargestCommittedCount < MAX_LARGEST_COMMITTED_REGIONS)
+					++uiLargestCommittedCount;
+				size_t uiSlot = uiLargestCommittedCount - 1;
+				while (uiSlot > 0 && aLargestCommittedRegions[uiSlot - 1].uiSize < uiCommittedSize)
+				{
+					aLargestCommittedRegions[uiSlot] = aLargestCommittedRegions[uiSlot - 1];
+					--uiSlot;
+				}
+				aLargestCommittedRegions[uiSlot].pBase = (const byte*)mInfo.BaseAddress;
+				aLargestCommittedRegions[uiSlot].uiSize = uiCommittedSize;
+				aLargestCommittedRegions[uiSlot].uiLowSize = adjSize;
+				aLargestCommittedRegions[uiSlot].uiProtect = mInfo.Protect;
+				aLargestCommittedRegions[uiSlot].uiType = mInfo.Type;
+				aLargestCommittedRegions[uiSlot].pAllocBase = (const byte*)mInfo.AllocationBase;
 			}
 			else if (mInfo.State == MEM_RESERVE)
 			{
@@ -2927,6 +2981,51 @@ LONG WINAPI CustomFilter(EXCEPTION_POINTERS* ExceptionInfo)
 		szExeName
 	);
 
+	//Composition detail is written separately so that a long breakdown cannot truncate the
+	//main report above (which is _TRUNCATE'd to 2048 bytes). Both land in crashes.log.
+	char szMemoryDetail[4096];
+	{
+		int iWritten = _snprintf_s(szMemoryDetail, _countof(szMemoryDetail), _TRUNCATE,
+			"Memory composition\n"
+			"committed MB by region type: low 2GB / total (regions)\n"
+			"private: %u / %u (%u)   mapped: %u / %u (%u)\n"
+			"image:   %u / %u (%u)   other:  %u / %u (%u)\n"
+			"committed MB by region size (regions)\n"
+			"<16K: %u (%u)  16-64K: %u (%u)  64-256K: %u (%u)\n"
+			"256K-1M: %u (%u)  1-16M: %u (%u)  >=16M: %u (%u)\n"
+			"largest committed regions (base / size KB / P|M|I|O / allocation base / protect)\n",
+			(unsigned)(aCommittedLowByType[MEMORY_TYPE_PRIVATE] >> 20), (unsigned)(aCommittedByType[MEMORY_TYPE_PRIVATE] >> 20), (unsigned)aCommittedRegionsByType[MEMORY_TYPE_PRIVATE],
+			(unsigned)(aCommittedLowByType[MEMORY_TYPE_MAPPED] >> 20), (unsigned)(aCommittedByType[MEMORY_TYPE_MAPPED] >> 20), (unsigned)aCommittedRegionsByType[MEMORY_TYPE_MAPPED],
+			(unsigned)(aCommittedLowByType[MEMORY_TYPE_IMAGE] >> 20), (unsigned)(aCommittedByType[MEMORY_TYPE_IMAGE] >> 20), (unsigned)aCommittedRegionsByType[MEMORY_TYPE_IMAGE],
+			(unsigned)(aCommittedLowByType[MEMORY_TYPE_OTHER] >> 20), (unsigned)(aCommittedByType[MEMORY_TYPE_OTHER] >> 20), (unsigned)aCommittedRegionsByType[MEMORY_TYPE_OTHER],
+			(unsigned)(aCommittedBySize[0] >> 20), (unsigned)aCommittedRegionsBySize[0],
+			(unsigned)(aCommittedBySize[1] >> 20), (unsigned)aCommittedRegionsBySize[1],
+			(unsigned)(aCommittedBySize[2] >> 20), (unsigned)aCommittedRegionsBySize[2],
+			(unsigned)(aCommittedBySize[3] >> 20), (unsigned)aCommittedRegionsBySize[3],
+			(unsigned)(aCommittedBySize[4] >> 20), (unsigned)aCommittedRegionsBySize[4],
+			(unsigned)(aCommittedBySize[5] >> 20), (unsigned)aCommittedRegionsBySize[5]);
+
+		size_t uiUsed = (iWritten > 0) ? (size_t)iWritten : strlen(szMemoryDetail);
+		for (size_t uiRegion = 0; uiRegion < uiLargestCommittedCount; ++uiRegion)
+		{
+			if (uiUsed + 72 >= _countof(szMemoryDetail))
+				break;
+			iWritten = _snprintf_s(szMemoryDetail + uiUsed, _countof(szMemoryDetail) - uiUsed, _TRUNCATE,
+				"0x%08x / %u / %c / 0x%08x / 0x%02x\n",
+				(unsigned)(size_t)aLargestCommittedRegions[uiRegion].pBase,
+				(unsigned)(aLargestCommittedRegions[uiRegion].uiSize >> 10),
+				(aLargestCommittedRegions[uiRegion].uiType == MEM_PRIVATE) ? 'P'
+					: (aLargestCommittedRegions[uiRegion].uiType == MEM_MAPPED) ? 'M'
+					: (aLargestCommittedRegions[uiRegion].uiType == MEM_IMAGE) ? 'I' : 'O',
+				(unsigned)(size_t)aLargestCommittedRegions[uiRegion].pAllocBase,
+				(unsigned)aLargestCommittedRegions[uiRegion].uiProtect);
+			if (iWritten > 0)
+				uiUsed += (size_t)iWritten;
+			else
+				break;
+		}
+	}
+
 	HANDLE hCrashlogs = CreateFile(_T("crashlogs\\crashes.log"), FILE_APPEND_DATA, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if( hCrashlogs != INVALID_HANDLE_VALUE )
 	{
@@ -2935,6 +3034,7 @@ LONG WINAPI CustomFilter(EXCEPTION_POINTERS* ExceptionInfo)
 		// excerpt below so its height stays bounded on small screens
 		WriteFile(hCrashlogs, szStackTrace, strlen(szStackTrace), NULL, NULL);
 		WriteFile(hCrashlogs, "\n", 1, NULL, NULL);
+		WriteFile(hCrashlogs, szMemoryDetail, strlen(szMemoryDetail), NULL, NULL);
 		CloseHandle(hCrashlogs);
 	}
 
