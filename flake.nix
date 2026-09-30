@@ -149,7 +149,17 @@
         repo="''${VP_REPO_ROOT:-$PWD}"
         export VP_SDK_ROOT="''${VP_SDK_ROOT:-${windowsSdk}}"
         export VP_MSVC_ROOT="''${VP_MSVC_ROOT:-${msvcToolchain}}"
-        export WINEPREFIX="''${WINEPREFIX:-''${TMPDIR:-/tmp}/vp-wine-prefix}"
+        # Reuse one prefix across shells. `nix develop` gives every shell a new
+        # TMPDIR, so a TMPDIR prefix was recreated (about 540 MB) per session
+        # and left behind. The Nix sandbox has no writable HOME and keeps TMPDIR.
+        if [ -z "''${WINEPREFIX:-}" ]; then
+          if [ -n "''${HOME:-}" ] && [ -d "$HOME" ] && [ -w "$HOME" ]; then
+            WINEPREFIX="''${XDG_CACHE_HOME:-$HOME/.cache}/vp-wine-prefix"
+          else
+            WINEPREFIX="''${TMPDIR:-/tmp}/vp-wine-prefix"
+          fi
+        fi
+        export WINEPREFIX
         export XDG_CACHE_HOME="$WINEPREFIX/xdg-cache"
         export XDG_CONFIG_HOME="$WINEPREFIX/xdg-config"
         export XDG_DATA_HOME="$WINEPREFIX/xdg-data"

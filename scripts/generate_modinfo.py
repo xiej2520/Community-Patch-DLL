@@ -30,13 +30,49 @@ from typing import Optional
 
 NS = {'ms': 'http://schemas.microsoft.com/developer/msbuild/2003'}
 
+# Match the repository's .gitattributes eol=crlf rules when hashing, regardless
+# of the checkout's working-tree line endings. Keep binary assets byte-exact.
+CRLF_HASH_EXTENSIONS = {
+    '.h', '.cpp', '.rc', '.vcproj', '.bat', '.sln', '.vcxproj', '.filters',
+    '.lua', '.xml', '.sql', '.fxsxml', '.ftsxml', '.fsmxml',
+}
+
 
 def compute_md5(file_path: Path) -> str:
     hash_md5 = hashlib.md5()
     with open(file_path, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b''):
-            hash_md5.update(chunk)
+        if file_path.suffix.lower() in CRLF_HASH_EXTENSIONS:
+            content = f.read()
+            content = content.replace(b'\r\n', b'\n').replace(b'\r', b'\n')
+            hash_md5.update(content.replace(b'\n', b'\r\n'))
+        else:
+            for chunk in iter(lambda: f.read(4096), b''):
+                hash_md5.update(chunk)
     return hash_md5.hexdigest().upper()
+
+
+def compute_eol_variant_md5s(file_path: Path) -> set:
+    """MD5s of the file as stored, with LF line endings, and with CRLF line endings.
+
+    Existing manifests were hashed on checkouts with differing line endings,
+    including file types outside CRLF_HASH_EXTENSIONS, so a recorded hash
+    matching any of these variants still describes the current content.
+    """
+    data = file_path.read_bytes()
+    lf = data.replace(b'\r\n', b'\n')
+    crlf = lf.replace(b'\n', b'\r\n')
+    return {hashlib.md5(v).hexdigest().upper() for v in (data, lf, crlf)}
+
+
+def read_existing_md5s(modinfo_path: Path) -> dict:
+    """Map each file path in an existing .modinfo to its recorded MD5."""
+    if not modinfo_path.exists():
+        return {}
+    text = modinfo_path.read_text(encoding='utf-8-sig')
+    return {
+        path: md5
+        for md5, path in re.findall(r'<File md5="([0-9A-Fa-f]+)"[^>]*>([^<]+)</File>', text)
+    }
 
 
 def escape_xml(text: str) -> str:
@@ -175,7 +211,7 @@ def parse_civ5proj(civ5proj_path: Path) -> dict:
     return data
 
 
-def generate_modinfo_xml(data: dict, mod_dir: Path) -> str:
+def generate_modinfo_xml(data: dict, mod_dir: Path, existing_md5s: Optional[dict] = None) -> str:
     lines = []
     lines.append('<?xml version="1.0" encoding="utf-8"?>')
     lines.append(f'<Mod id="{data["guid"]}" version="{data["mod_version"]}">')
@@ -244,6 +280,11 @@ def generate_modinfo_xml(data: dict, mod_dir: Path) -> str:
         if full_path.exists():
             md5_hash = compute_md5(full_path)
             normalized_path = str(file_path).replace('\\', '/')
+            # Keep a recorded hash that differs only by line endings so that
+            # regenerating on another OS does not rewrite unchanged entries.
+            existing = (existing_md5s or {}).get(normalized_path, '').upper()
+            if existing and existing != md5_hash and existing in compute_eol_variant_md5s(full_path):
+                md5_hash = existing
             lines.append(f'    <File md5="{md5_hash}" import="{file_info["import"]}">{normalized_path}</File>')
         else:
             missing.append(str(full_path))
@@ -324,7 +365,8 @@ def generate_modinfo_for(civ5proj_path: Path, output_dir_arg: Optional[Path]) ->
     modinfo_path = output_dir / modinfo_name
 
     print(f"Generating: {modinfo_name}")
-    xml_content, missing_files = generate_modinfo_xml(data, mod_dir)
+    existing_md5s = read_existing_md5s(mod_dir / modinfo_name)
+    xml_content, missing_files = generate_modinfo_xml(data, mod_dir, existing_md5s)
 
     for f in missing_files:
         print(f"  WARNING: File not found: {f}")

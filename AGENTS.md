@@ -105,9 +105,9 @@ checked-out source and project files as authoritative for the current revision.
 Validate the smallest relevant surface first, then report anything this
 environment could not run.
 
-- Manifest/project check without touching tracked manifests (run on Windows;
-  `.civ5proj` paths use backslashes and produce false missing-file warnings on
-  POSIX):
+- Manifest/project check without touching tracked manifests (works on Windows
+  and POSIX; text files are hashed with CRLF line endings, and recorded MD5s
+  that differ only by line endings are kept):
 
   ```text
   python scripts/generate_modinfo.py "(1) Community Patch" --output-dir C:\Temp\vp-modinfo
@@ -117,6 +117,33 @@ environment could not run.
   whose source files are missing.
 - Lua, when `luacheck` is available: run `luacheck` on the changed Lua files;
   the repository configuration knows Civ V engine globals.
+- SQL/XML database changes: a plain SQLite syntax check is not enough. Civ V
+  stops executing a SQL file at its first failing statement, so one bad column
+  or table name silently skips the rest of that file. Many VP files also create
+  `TEMP TABLE Helper` and drop it only at the end, so an early failure leaks the
+  table and makes every later file's `CREATE TEMP TABLE Helper` fail as well.
+  - Before using a column, confirm it exists in the real schema: grep the base
+    definitions and CP's `ALTER TABLE`/`CREATE TABLE` changes (for example
+    `(1) Community Patch/Database Changes/Units/UnitTableChanges.sql`). Do not
+    infer a column from a DLL getter or Lua method name; e.g. `Units` has no
+    `CargoSpace` column, and capacity comes from `PROMOTION_CARGO_*`.
+  - Offline check: copy `Civ5DebugDatabase.db` (and, for `Language_*` changes,
+    the localization database) from `My Games/Sid Meier's Civilization 5/cache`
+    after starting a game with the mods enabled, before `deploy-vp.sh` deletes
+    that folder. Then run
+    `python scripts/validate_sql.py --db <copy> "(2) Vox Populi"`. It compiles
+    each project's `UpdateDatabase` files in load order against that schema,
+    stops a file at its first error like the game does, and reports leaked
+    `TEMP` tables. It does not catch constraint/data errors or syntax that is too
+    new for the game's SQLite, so still read `Database.log` before claiming
+    success.
+  - Authoritative check: set `LoggingEnabled = 1` in `config.ini`, start a game
+    with the changed components, and read `Logs/Database.log` before anything
+    else. Any `no such column`, `no such table`, `already exists`, constraint, or
+    `Failed Validation` line from mod files is a blocker. Known harmless noise:
+    `ContentPackage.LocalizedText`, `ArtDefine_StrategicView` uniqueness, and
+    `ArtDefine_Landmarks.LayoutHandler` references. Civ rewrites the logs on
+    every launch, so copy them before restarting.
 - DLL on a configured Windows host:
   `python build_vp_clang.py --config debug` and
   `python build_vp_clang.py --config release`. This requires VS2008 SP1 via

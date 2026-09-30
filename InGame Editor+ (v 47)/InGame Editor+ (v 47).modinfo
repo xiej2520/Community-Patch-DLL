@@ -50,7 +50,7 @@
     <File md5="986060848CF2A3DE89866232A740AD57" import="1">IGE_API_Data.lua</File>
     <File md5="26D9A2438987B90C4191673C91B1775A" import="1">IGE_API_Misc.lua</File>
     <File md5="0F7F2220EBE67BAAD5C3838366C94EFB" import="1">IGE_API_Rivers.lua</File>
-    <File md5="D9620CDF973A1595FB6D3F5569C6BB89" import="1">IGE_API_Terrain.lua</File>
+    <File md5="A20FC9D11B11DC8A043B6F7C3EBC6C39" import="1">IGE_API_Terrain.lua</File>
     <File md5="0F52577B1BD6F115B2CC100B5265ED61" import="1">IGE_API_UI.lua</File>
     <File md5="5546BD6748DFC7CBD59F6239D90CDB57" import="1">IGE_Controller_All.lua</File>
     <File md5="3A2442A00874833DDDB7EF136D0B9CB1" import="1">IGE_Controller_All.xml</File>
@@ -111,7 +111,7 @@
     <File md5="6B5865976523DD86BDF7A5BE476986B9" import="1">BulkUI/IGE_WonderPopup.xml</File>
     <File md5="98F9B8E63C3DF4BA292752C3427901D4" import="0">Localization/changes.txt</File>
     <File md5="C1E454A2257F2B7457573D4683A16E09" import="0">Localization/IGE_DE_DE.xml</File>
-    <File md5="AA4948832F5D6FE345A6F952A747EB5D" import="0">Localization/IGE_EN_US.xml</File>
+    <File md5="5F9FF94BC1080E40EA40DA152B89F6A9" import="0">Localization/IGE_EN_US.xml</File>
     <File md5="356FB073D7D5312E0868D6792F1219BA" import="0">Localization/IGE_ES_ES.xml</File>
     <File md5="D1D8CBC992B39D96F5F85720F455F56B" import="0">Localization/IGE_FR_FR.xml</File>
     <File md5="EABDCB39CA82A919FF3EA0B100BB3883" import="0">Localization/IGE_IT_IT.xml</File>
@@ -122,11 +122,11 @@
     <File md5="D35E3E5AFE54E4B466BDF5EC472A3B7F" import="1">Panels/IGE_ActivePlayerSelection.xml</File>
     <File md5="3F4416CF0D1BD25F51A622B8A9F18A3D" import="1">Panels/IGE_CitiesPanel.lua</File>
     <File md5="966E72FB6BE1EE3EB69B76DA1B0E2465" import="1">Panels/IGE_CitiesPanel.xml</File>
-    <File md5="A33D50EA568B5DFBDC4BFD2BEC5EC7A4" import="1">Panels/IGE_PlayersPanel.lua</File>
+    <File md5="F66FAA8F19DD71086F052A244F7B6F62" import="1">Panels/IGE_PlayersPanel.lua</File>
     <File md5="3F38B74B9FC96D1C78DCE48500D7DDC0" import="1">Panels/IGE_PlayersPanel.xml</File>
     <File md5="456342A9A682DEE4052BB4DBE9447701" import="1">Panels/IGE_PoliciesPanel.lua</File>
     <File md5="15253BAF4CB0143986653F03DCB09D43" import="1">Panels/IGE_PoliciesPanel.xml</File>
-    <File md5="A8AE983A216F03186F688C94356B6B66" import="1">Panels/IGE_WorldCongressPanel.lua</File>
+    <File md5="74C7709B0424E010C2FC60AFBD97249B" import="1">Panels/IGE_WorldCongressPanel.lua</File>
     <File md5="899EF73413FDB6DEB3DB8B803740DA66" import="1">Panels/IGE_WorldCongressPanel.xml</File>
     <File md5="1AEDFE2D2A7B522103872993520FE9C5" import="1">Panels/IGE_TechsPanel.lua</File>
     <File md5="8183B5F8A31AADEFA4B4C3927797B1FA" import="1">Panels/IGE_TechsPanel.xml</File>
@@ -135,7 +135,7 @@
     <File md5="077A515826BD8DD65645059A7C8B9941" import="1">Panels/IGE_UnitsPanel.lua</File>
     <File md5="0CDDDBC87D5FBA1071F58125651330FD" import="1">Panels/IGE_UnitsPanel.xml</File>
     <File md5="F875749557EA1B1E4CC588AE0D89AB2D" import="1">Widgets/IGE_ConfirmPopup.lua</File>
-    <File md5="A6E5F7C654B462A9C3D75483DE264587" import="1">Widgets/IGE_ConfirmPopup.xml</File>
+    <File md5="415DF776E9B4B78C296B2263D20B5056" import="1">Widgets/IGE_ConfirmPopup.xml</File>
     <File md5="32728A2BD49FDF023D5AD9D73FB8AC47" import="1">Widgets/IGE_RiversElement.lua</File>
     <File md5="63DE978FE5056E18609D1493C62164EA" import="1">Widgets/IGE_RiversElement.xml</File>
     <File md5="4DB70533F459BE436A98349ADC77E252" import="1">Widgets/IGE_TabsBar.lua</File>
