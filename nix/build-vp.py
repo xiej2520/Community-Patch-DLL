@@ -12,6 +12,7 @@ import platform
 import shutil
 import subprocess
 import sys
+import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -171,21 +172,55 @@ def sdk_directories(sdk: Path) -> tuple[Path, Path, Path, Path]:
     return directories
 
 
+# Wall time of each command, keyed by its log path.
+TIMINGS: dict[Path, float] = {}
+
+
 def run(command: list[str], *, cwd: Path, log: Path) -> None:
-    print(f"Running {log.relative_to(log.parents[1])}", flush=True)
-    result = subprocess.run(command, cwd=cwd, text=True, capture_output=True)
+    name = str(log.relative_to(log.parents[1]))
+    print(f"Running {name}", flush=True)
     log.parent.mkdir(parents=True, exist_ok=True)
-    log.write_text(
-        "$ " + subprocess.list2cmdline(command) + "\n" + result.stdout + result.stderr,
-        encoding="utf-8",
-    )
+    started = time.monotonic()
+    # Write output straight to the log rather than through pipes: link.exe
+    # spawns mspdbsrv.exe, which inherits the output handles and stays alive
+    # until its idle timeout (about ten minutes). Reading pipes to EOF would
+    # wait for that server; waiting for the process itself does not.
+    with log.open("w", encoding="utf-8", errors="replace") as stream:
+        stream.write("$ " + subprocess.list2cmdline(command) + "\n")
+        stream.flush()
+        result = subprocess.run(command, cwd=cwd, stdout=stream, stderr=subprocess.STDOUT)
+    elapsed = time.monotonic() - started
+    TIMINGS[log] = elapsed
     if result.returncode:
         # Nix removes a failed derivation's output directory, so diagnostics
         # written only to the per-command log would otherwise be lost.
-        sys.stderr.write(result.stdout)
-        sys.stderr.write(result.stderr)
+        sys.stderr.write(log.read_text(encoding="utf-8", errors="replace"))
         fail(f"command failed; see {log}")
-    print(f"Finished {log.relative_to(log.parents[1])}", flush=True)
+    print(f"Finished {name} ({elapsed:.1f}s)", flush=True)
+
+
+def print_timing_summary(output_dir: Path, compile_wall: float | None) -> None:
+    logs = output_dir / "logs"
+    special = {logs / "_precompile.log", logs / "manifest-resource.log", output_dir / "build.log"}
+
+    def phase(log: Path) -> str:
+        return f"{TIMINGS[log]:.1f}s" if log in TIMINGS else "skipped"
+
+    print("Timing summary:")
+    print(f"  precompiled header: {phase(logs / '_precompile.log')}")
+    if compile_wall is None:
+        print("  compile (wall):     skipped")
+    else:
+        print(f"  compile (wall):     {compile_wall:.1f}s")
+        compiles = sorted(
+            ((elapsed, log) for log, elapsed in TIMINGS.items() if log not in special),
+            key=lambda item: item[0],
+            reverse=True,
+        )
+        for elapsed, log in compiles[:5]:
+            print(f"    {elapsed:7.1f}s  {log.relative_to(logs)}")
+    print(f"  manifest resource:  {phase(logs / 'manifest-resource.log')}")
+    print(f"  link:               {phase(output_dir / 'build.log')}")
 
 
 def compile_one(
@@ -289,6 +324,62 @@ def write_provenance(
     )
 
 
+def compile_all(
+    compiler: list[str],
+    path_converter,
+    repo: Path,
+    sources: list[Path],
+    build_dir: Path,
+    output_dir: Path,
+    common_args: list[str],
+    pch: Path,
+    pch_obj: Path,
+    jobs: int,
+    objects: list[Path],
+) -> float:
+    """Build the precompiled header and all sources; return the compile wall time."""
+    run(
+        [
+            *compiler,
+            *common_args,
+            f"/Yc{PCH_HEADER}",
+            f"/Fp{path_converter(pch)}",
+            path_converter(PCH_SOURCE),
+            f"/Fo{path_converter(pch_obj)}",
+        ],
+        cwd=repo,
+        log=output_dir / "logs/_precompile.log",
+    )
+
+    started = time.monotonic()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=jobs) as executor:
+        futures = []
+        for source in sources:
+            output = (build_dir / source).with_suffix(".obj")
+            log = (output_dir / "logs" / source).with_suffix(".log")
+            futures.append(
+                executor.submit(
+                    compile_one,
+                    compiler,
+                    path_converter,
+                    repo,
+                    source,
+                    output,
+                    common_args,
+                    pch,
+                    log,
+                )
+            )
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                objects.append(future.result())
+            except BaseException:
+                for pending in futures:
+                    pending.cancel()
+                raise
+    return time.monotonic() - started
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", choices=("debug", "release"), default="debug")
@@ -306,6 +397,18 @@ def main() -> None:
     parser.add_argument("--build-dir", type=Path)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--version", help="version embedded in the DLL (defaults to git describe)")
+    parser.add_argument(
+        "--link-only",
+        action="store_true",
+        help="relink the objects of a previous build made with the same compile flags, without compiling (for link measurements)",
+    )
+    parser.add_argument(
+        "--link-flag",
+        action="append",
+        default=[],
+        metavar="FLAG",
+        help="append a linker flag, e.g. /OPT:NOICF; repeatable (for link measurements)",
+    )
     args = parser.parse_args()
 
     if args.sdk_root is None:
@@ -352,7 +455,8 @@ def main() -> None:
         linker = [lld]
         compiler_display = [clang]
         linker_display = [lld]
-    write_version(repo, args.version)
+    if not args.link_only:
+        write_version(repo, args.version)
 
     defines = list(COMMON_DEFINES)
     if args.config == "release":
@@ -390,7 +494,11 @@ def main() -> None:
 
     print(f"Building {configuration} DLL with {args.jobs} jobs using {args.backend}")
     helper_obj = build_dir / "clang.obj"
-    if args.backend == "clang":
+    compile_stamp = build_dir / "compile-args.json"
+    if args.link_only:
+        if not compile_stamp.is_file() or json.loads(compile_stamp.read_text(encoding="utf-8")) != common_args:
+            fail(f"--link-only needs objects compiled with the same flags; run a full {configuration} build first")
+    elif args.backend == "clang":
         compile_one(
             compiler,
             path_converter,
@@ -405,45 +513,23 @@ def main() -> None:
     sources = source_files(repo)
     pch = build_dir / "CvGameCoreDLLPCH.pch"
     pch_obj = build_dir / "_precompile.obj"
-    run(
-        [
-            *compiler,
-            *common_args,
-            f"/Yc{PCH_HEADER}",
-            f"/Fp{path_converter(pch)}",
-            path_converter(PCH_SOURCE),
-            f"/Fo{path_converter(pch_obj)}",
-        ],
-        cwd=repo,
-        log=output_dir / "logs/_precompile.log",
-    )
-
     objects: list[Path] = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as executor:
-        futures = []
-        for source in sources:
-            output = (build_dir / source).with_suffix(".obj")
-            log = (output_dir / "logs" / source).with_suffix(".log")
-            futures.append(
-                executor.submit(
-                    compile_one,
-                    compiler,
-                    path_converter,
-                    repo,
-                    source,
-                    output,
-                    common_args,
-                    pch,
-                    log,
-                )
-            )
-        for future in concurrent.futures.as_completed(futures):
-            try:
-                objects.append(future.result())
-            except BaseException:
-                for pending in futures:
-                    pending.cancel()
-                raise
+    compile_wall = None
+    if args.link_only:
+        objects = [(build_dir / source).with_suffix(".obj") for source in sources]
+        missing = [str(path) for path in (pch_obj, *objects) if not path.is_file()]
+        if args.backend == "clang" and not helper_obj.is_file():
+            missing.append(str(helper_obj))
+        if missing:
+            fail("--link-only is missing objects from a previous build: " + ", ".join(missing[:5]))
+    else:
+        # Written only after every object compiles, so a failed build never
+        # leaves a matching stamp next to stale objects.
+        compile_stamp.unlink(missing_ok=True)
+        compile_wall = compile_all(
+            compiler, path_converter, repo, sources, build_dir, output_dir, common_args, pch, pch_obj, args.jobs, objects
+        )
+        compile_stamp.write_text(json.dumps(common_args, indent=2) + "\n", encoding="utf-8")
 
     dll = output_dir / f"{CORE_DLL}.dll"
     pdb = output_dir / f"{CORE_DLL}.pdb"
@@ -508,6 +594,10 @@ def main() -> None:
     libraries = MSVC_LIBRARIES if args.backend == "msvc" else CLANG_LIBRARIES
     link_flags.extend(path_converter(repo / library) for library in libraries)
     link_flags.extend(MSVC_WINDOWS_LIBRARIES if args.backend == "msvc" else WINDOWS_LIBRARIES)
+    if os.environ.get("VP_LINK_TIME") == "1":
+        # Undocumented VC linker switch: prints the time spent in each pass.
+        link_flags.append("/TIME")
+    link_flags.extend(args.link_flag)
     if args.backend == "clang":
         link_flags.append(path_converter(helper_obj))
     link_flags.append(path_converter(pch_obj))
@@ -537,6 +627,7 @@ def main() -> None:
         dll=dll,
         pdb=pdb,
     )
+    print_timing_summary(output_dir, compile_wall)
     print(f"Built {dll}")
     print(f"Debug symbols: {pdb}")
     print(f"Build provenance: {output_dir / 'build-info.json'}")

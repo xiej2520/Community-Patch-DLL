@@ -24,6 +24,45 @@ Run build commands from the repository root. The flake supplies Python, Wine,
 the VC9 compiler and linker, the Windows SDK, LLVM, and the development tools;
 do not install a different MinGW C++ toolchain for this build.
 
+## Quick start
+
+Set the two Civilization V paths once, either by editing the defaults at the top
+of `deploy-vp.sh` or by exporting them (see
+[Deploy to a Proton installation](#deploy-to-a-proton-installation)):
+
+```sh
+export CIV5_USER_DIR=".../compatdata/8930/pfx/drive_c/users/steamuser/Documents/My Games/Sid Meier's Civilization 5"
+export CIV5_GAME_DIR=".../steamapps/common/Sid Meier's Civilization V"
+```
+
+Then, from the repository root:
+
+```sh
+nix develop                                    # shell with vp-build, Wine, VC9 and the SDK
+
+VP_FAST_BUILD=1 ASSUME_YES=1 ./deploy-vp.sh    # test build without /GL and /LTCG (about 1 minute), then install
+ASSUME_YES=1 ./deploy-vp.sh                    # full Release build (about 4 minutes), then install
+VP_SKIP_BUILD=1 ASSUME_YES=1 ./deploy-vp.sh    # only Lua/SQL/XML changed: reinstall the mods, reuse the last DLL
+```
+
+Use the fast build while testing changes and the full Release build for any DLL
+that will be kept or shared. Both write `BuildOutput/Release/`, so
+`VP_SKIP_BUILD=1` reinstalls whichever was built last; `build-info.json` records
+the flags (a full Release build lists `/GL`).
+
+To build without installing, run `vp-build` in the same shell:
+
+```sh
+vp-build --config release --fast    # BuildOutput/Release, fast
+vp-build --config release           # BuildOutput/Release, full whole-program optimization
+vp-build --config debug             # BuildOutput/Debug
+```
+
+The first run downloads and extracts the legacy toolchain into the Nix store and
+creates a Wine prefix in `~/.cache/vp-wine-prefix`; later runs reuse both. After
+deploying, start Civilization V through Mods, enable the components, and check
+`Logs/Database.log` and `Lua.log` (see the Validation section of `AGENTS.md`).
+
 ## Build with the supported backend
 
 Enter the reproducible development shell:
@@ -61,8 +100,8 @@ nix build .#fast          # MSVC Release without /GL and /LTCG
 The default package writes a `result` symlink to a Nix-store directory. The
 fast package is useful for iteration because it retains the VC9 compiler,
 headers, runtime, and Release defines while omitting whole-program
-optimization. It is not code-generation-equivalent to the normal Release
-build.
+optimization; it builds in about a minute instead of about four. It is not
+code-generation-equivalent to the normal Release build.
 
 The driver also works without entering the shell:
 
@@ -86,8 +125,10 @@ invokes the VC9 linker for the final PE32 DLL.
   and the supporting debug-PDB binaries.
 
 Nix extracts these archives into content-addressed store paths. The compiler
-and linker are then run through Wine with a temporary or user-selected Wine
-prefix. The archives are downloaded only when the corresponding Nix store
+and linker are then run through Wine. Outside the Nix sandbox, `vp-build` reuses
+one prefix at `${XDG_CACHE_HOME:-~/.cache}/vp-wine-prefix` (about 540 MB) unless
+`WINEPREFIX` is set; sandboxed package builds use a prefix in their temporary
+directory. The archives are downloaded only when the corresponding Nix store
 paths are absent; subsequent builds reuse the store contents. No downloaded
 SDK or compiler files are copied into the repository.
 
@@ -113,6 +154,22 @@ timestamp-based incremental compiler. A repeated `vp-build` invocation may
 therefore recompile translation units. Nix package builds are clean derivation
 builds. The intermediate directories are ignored by version control.
 
+Each step prints its wall time, and the build ends with a timing summary
+(precompiled header, compile wall time with the slowest sources, manifest
+resource, link). Set `VP_LINK_TIME=1` to also pass the linker's `/TIME` switch,
+which writes per-pass timings to `build.log`.
+
+To measure or experiment with the link alone, relink the objects of a previous
+build that used the same compile flags:
+
+```sh
+VP_LINK_TIME=1 vp-build --config release --fast --link-only
+vp-build --config release --fast --link-only --link-flag /OPT:NOICF
+```
+
+`--link-only` refuses to run if the objects were compiled with different flags.
+`--link-flag` appends a linker option and is intended only for measurements.
+
 ## Release optimization and link time
 
 The normal MSVC Release build follows the project's VC9 settings:
@@ -122,11 +179,25 @@ The normal MSVC Release build follows the project's VC9 settings:
 - `/GL` during compilation;
 - `/LTCG`, `/OPT:REF`, and `/OPT:ICF` during linking.
 
-The MSVC link step is the slow part and can take several minutes. The pinned
-VS2008 linker does not support the newer `/LTCG:INCREMENTAL` option, and
-`/INCREMENTAL` cannot be combined with `/LTCG`. The supported way to shorten an
-iteration is therefore the `fast` package or `--fast`, followed by a normal
-Release build for the artifact that will be deployed.
+The whole-program link is the slow part: VC9 performs code generation for the
+entire DLL in a single thread during `/LTCG`. On a 16-core machine a full
+Release build takes about four minutes, of which roughly 200 seconds is that
+link step; a `--fast` link takes about 11 seconds. The pinned VS2008 linker does
+not support the newer `/LTCG:INCREMENTAL` option, and `/INCREMENTAL` cannot be
+combined with `/LTCG`. The supported way to shorten an iteration is therefore
+the `fast` package, `--fast`, or `VP_FAST_BUILD=1 ./deploy-vp.sh`, followed by a
+normal Release build for the artifact that will be kept or shared.
+
+`CvWorldBuilderMapWin32.lib` and `FireWorksWin32.lib` contain `/GL` objects, so
+even a `--fast` link prints "restarting link with /LTCG". That restart costs only
+a few seconds. Do not replace them with the plain `.obj` archives used by the
+clang build: those require CRT helpers (`__ftol3`, `__ltod3`) that VC9 does not
+provide.
+
+`link.exe` starts `mspdbsrv.exe`, which keeps running until an idle timeout of
+about ten minutes. The driver therefore writes command output directly to the
+log files instead of reading pipes; reading pipes to end-of-file would wait for
+that server and add roughly ten minutes to every link.
 
 Do not switch the supported build to MinGW. Its C++ ABI and standard library
 are not compatible with the Civ V executable or the VC9 libraries. The
@@ -162,13 +233,17 @@ For a Windows-mounted Steam library, set the variables to the corresponding
 `MODS`, `Text`, and optionally `cache`; the game directory must contain
 `Assets/DLC`.
 
-The deployment script defaults to `VP_BUILD_MODE=direct`, using the persistent
-direct `vp-build` driver. To use it from a Nix development shell:
+The deployment script defaults to `VP_BUILD_MODE=direct`, which runs the
+`vp-build` driver found on `PATH` with persistent build directories. Run it from
+the Nix development shell, which provides `vp-build`:
 
 ```sh
 nix develop
-ASSUME_YES=1 VP_BUILD_MODE=direct ./deploy-vp.sh
+ASSUME_YES=1 ./deploy-vp.sh
 ```
+
+Outside that shell, use `VP_BUILD_MODE=nix` (a clean `nix build` of the package)
+or `VP_BUILD_MODE=auto` (direct when the toolchain is available, otherwise Nix).
 
 A completely non-Nix invocation requires a local Wine-accessible VC9 toolchain
 and Windows SDK:
@@ -198,7 +273,7 @@ The deployment script then:
    Congress exports;
 6. installs `VPUI_tips_en_us.xml`, `VPUI`, and `UI_bc1`;
 7. optionally installs Squads; and
-8. removes the Proton cache when `CLEAR_CACHE=1`.
+8. removes the game's `cache` directory (the default; set `CLEAR_CACHE=0` to keep it).
 
 The script intentionally rejects `ENABLE_43_CIVS=1`: the checked-in 43-civ
 component contains a different DLL and would overwrite the custom standard
@@ -241,8 +316,11 @@ before changing any mod files.
 - **A compile error occurs:** inspect the matching file under
   `BuildOutput/<Config>/logs/`.
 - **The link fails or appears stuck:** inspect `BuildOutput/<Config>/build.log`.
-  Release whole-program optimization is expected to spend several minutes in
-  the linker.
+  A full Release link normally takes about three and a half minutes and a
+  `--fast` link about ten seconds; the timing summary at the end of the build
+  shows each step. A link that takes roughly ten minutes longer than that means
+  something is again waiting for `mspdbsrv.exe` (see
+  [Release optimization and link time](#release-optimization-and-link-time)).
 - **The game cannot see the deployed mod:** confirm that the game is running
   through Proton and that the mod was copied under that prefix's
   `drive_c/users/steamuser/Documents/.../MODS`, not only to the native Linux
