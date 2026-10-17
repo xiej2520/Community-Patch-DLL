@@ -12428,6 +12428,9 @@ void CvGame::LogMapState() const
 	CvString strLogName;
 	strLogName = strLogName.format("mapStateLog_Turn%03d.json", GC.getGame().getElapsedGameTurns());
 	FILogFile* pLog = LOGFILEMGR.GetLog(strLogName, FILogFile::kDontTimeStamp);
+	if (!pLog)
+		return;
+
 	CvString outputJson = "{\"MapData\": {";
 	CvString strTemp;
 
