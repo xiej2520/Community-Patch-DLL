@@ -41,11 +41,12 @@ Minidumps are automatically generated when the game encounters an unhandled exce
 
 ## Locating Minidump Files
 
-Minidump files are saved in the **same directory as the game executable** when a crash occurs.
+Minidump files and `crashes.log` are saved in the **`crashlogs` folder in the game directory** (next to the game executable) when a crash occurs.
 
 **Typical locations:**
-- **Steam:** `C:\Program Files (x86)\Steam\steamapps\common\Sid Meier's Civilization V\`
-- **Non-Steam:** `C:\Program Files (x86)\2K Games\Sid Meier's Civilization V\`
+- **Steam:** `C:\Program Files (x86)\Steam\steamapps\common\Sid Meier's Civilization V\crashlogs\`
+- **Non-Steam:** `C:\Program Files (x86)\2K Games\Sid Meier's Civilization V\crashlogs\`
+- **Proton (Linux):** `steamapps/common/Sid Meier's Civilization V/crashlogs/` in the Linux Steam library
 - **Mod testing with ModBuddy:** The folder where you placed the compiled DLL
 
 Look for files matching the pattern `CvMiniDump_*.dmp`.
@@ -258,7 +259,7 @@ This shows an access violation trying to read from a null pointer at `CvPlayer::
 
 When reporting a crash:
 
-1. **Locate the minidump file** in your game directory
+1. **Locate the minidump file** in the game directory's `crashlogs` folder
 2. **Zip the minidump file** - minidumps compress very well (use `.zip` format for GitHub compatibility)
 3. **Note the exact version** you were running
 4. **Describe what you were doing** when the crash occurred

@@ -307,6 +307,176 @@ have the corresponding World Congress version, first check that Civilization V
 is using the same Proton prefix named by `CIV5_USER_DIR`, then check this hash
 before changing any mod files.
 
+## Running Civilization V on Linux
+
+Run the Windows version of the game through Proton. The native Linux client
+cannot load a custom game-core DLL, so the Community Patch does not work there.
+
+1. In Steam, open Civilization V → Properties → Compatibility and select
+   **Force the use of a specific Steam Play compatibility tool** (a current
+   Proton release; Proton 11 / Wine 11 has been tested).
+2. Set the launch options (Properties → General → Launch Options) to load only
+   the Vulkan driver for your GPU:
+
+   ```text
+   VK_LOADER_DRIVERS_SELECT='*radeon*' %command%
+   ```
+
+   Use `'*nvidia*'` or `'*intel*'` on those GPUs.
+
+   Do not add `PROTON_USE_WOW64=1`. Proton's WoW64 mode would move the Linux
+   libraries out of the game's 4 GB, but Civilization V crashes at startup in
+   it (see [Address space under Proton](#address-space-under-proton)).
+3. Start the game once so Proton creates the prefix under
+   `steamapps/compatdata/8930/`, then quit. That prefix's `My Games` directory
+   is `CIV5_USER_DIR` (see [Quick start](#quick-start)).
+4. Deploy with `./deploy-vp.sh`, start the game, and choose the DirectX 11
+   version in the launcher. Enable the mods under Mods.
+
+### Why the launch option matters
+
+Civilization V is a 32-bit program, so it has 4 GB of address space. Proton
+already marks it large-address-aware and renders through DXVK, but the Linux
+graphics drivers are loaded into the same 4 GB. Without
+`VK_LOADER_DRIVERS_SELECT`, the Vulkan loader maps every installed driver
+(`lvp`, `intel`, `radeon`, `nouveau`, ...), which costs more than 100 MB before
+the game loads anything. Late games then crash with out-of-memory errors much
+earlier than on Windows.
+
+To check that the option applied, run this while the game is running:
+
+```sh
+p=$(pgrep CivilizationV | tail -n 1)
+grep -o 'libvulkan_[a-z_]*\.so' "/proc/$p/maps" | sort -u
+```
+
+Only the driver for your GPU should be listed. If it is listed twice from two
+different Mesa store paths (common on NixOS after a system switch), Steam's
+container still holds the Mesa from before the switch. Quit Steam completely
+(Steam → Exit) and start it again; that saves another 19 MB.
+
+### Memory growth in long games
+
+Wine's heap fragments more than the Windows heap under repeated large
+allocate/free cycles. DLLs built before the tactical-simulation fix (upstream
+PR #13496, plus always soft-resetting the simulation pools in
+`CvTacticalAI::FindBestUnitAssignments`) freed and reallocated 60–90 MB of
+simulation buffers about 20 times per AI turn, and under Proton the address
+space then grew by 20–40 MB per turn once wars started. Use a DLL that contains
+both changes for long games.
+
+Two more copies were removed for the same reason: `CvPlot::setImprovementType`
+copied every trade route's plot list once per plot of the route when cancelling
+routes, and `CvPathFinder::GetPlotsInReach` copied its result (up to one entry
+per map plot) on return. With all of these, a late game on a large map grows by
+about 0.5–0.8 MB of address space per turn, most of it heap fragmentation rather
+than live data; a test game from a turn-292 save ran out of memory around turn
+787 instead of turn 303.
+
+A late-game crash with the assertion "Area effect vector somehow contains
+invalid unit ID" and an access violation writing to `0x000008d8` is not a
+memory problem, even though the crash report blames the address space. Stale
+unit indices in the area-effect cache cause it, usually with many AI fighters;
+upstream PR #13488 fixes it.
+
+If a late game still runs out of memory, these in-game settings help:
+
+- Leader Scene Quality at minimum;
+- lower texture quality and resolution;
+- yield icons turned off in the late game, or not zooming far out with them on.
+
+### Logs and crash reports
+
+All game files are inside the Proton prefix, not under `~/.local/share/Aspyr`:
+
+- `CIV5_USER_DIR/config.ini`: set `LoggingEnabled = 1` to write logs (see
+  `DEVELOPMENT.md`). Turn it off again for normal play; the AI logs are large.
+- `CIV5_USER_DIR/Logs/`: `Database.log`, `Lua.log`, and the AI logs. The game
+  rewrites them on every launch, so copy them before restarting.
+- `CIV5_GAME_DIR/crashlogs/`: `crashes.log` and `CvMiniDump_*.dmp`. See
+  [minidumps.md](minidumps.md) for reading the dumps.
+
+### Reading memory numbers under Proton
+
+Do not trust the memory markers in `crashes.log` under Proton. 32-bit Wine
+reports every part of the address space it does not manage itself as
+reserved, including space that is still free and space used by the Linux side
+(graphics drivers, DXVK's mapped GPU memory, native libraries). The low 2 GB
+fills first, and Wine then keeps allocating above it, so the report shows a
+largest free block under 1 MB and "low address space may have failed an
+allocation" even when hundreds of MB are still free. Check the crash location
+and assertion first.
+
+To see the real address space, read the process's Linux memory map while the
+game runs:
+
+```sh
+p=$(pgrep CivilizationV | tail -n 1)
+grep VmSize "/proc/$p/status"    # close to 4194304 kB means the 4 GB is full
+```
+
+`/proc/$p/maps` lists every mapping, so it shows what fills the space.
+
+### Address space under Proton
+
+Proton runs the game as a 32-bit Wine process, so everything the Linux side
+loads for it shares the game's 4 GB. Measured at turn 429 of a large late game
+(AMD GPU, NixOS, Proton Experimental):
+
+| MB | What |
+|---|---|
+| 1871 | game memory below 2 GB (fills during loading) |
+| 856 | game memory above 2 GB (all later growth lands here) |
+| 594 | free (largest block 296 MB) |
+| 178 | `libLLVM`, needed by Mesa's AMD Vulkan driver |
+| 139 | files: the exe, DLLs, assets, shared memory |
+| 127 | DXVK's mapped GPU memory |
+| 114 | Wine reservations and guard pages |
+| 83 | other Linux libraries |
+| 57 | Mesa OpenGL (`libgallium`), loaded by Wine itself |
+| 38 | Vulkan drivers (19 MB was a stale duplicate, see above) |
+| 22 | Linux per-thread malloc heaps |
+
+About 380 MB of that is Linux-side overhead that a Windows install does not
+have. What was tried:
+
+- **`PROTON_USE_WOW64=1`** (Proton's new WoW64 mode) runs the game in a 64-bit
+  Linux process and moves those libraries above 4 GB (17 MB left below 4 GB in
+  a test). Civilization V crashes about 5 seconds after starting in it,
+  before any mod loads: the exe's `operator delete`
+  (`CivilizationV_DX11.exe+0x413d2a`) frees `0xfe000000` through `msvcr90` and
+  Wine's heap faults reading its header. Same result with
+  `PROTON_HEAP_ZERO_MEMORY=1` and on Proton Experimental's `bleeding-edge`
+  branch.
+- **`LD_PRELOAD=`** (dropping the Steam overlay library) does not remove
+  OpenGL: Wine's `winex11.so` loads `libGL` itself.
+- **`VK_DRIVER_FILES`** with explicit manifest paths loaded more drivers inside
+  Steam's container, not fewer (lavapipe, Asahi and Dozen came back). Keep
+  `VK_LOADER_DRIVERS_SELECT`.
+
+One option was not tried: a 32-bit Mesa without LLVM. Mesa's AMD drivers can
+compile shaders with ACO alone, and dropping LLVM would remove `libLLVM`
+(178 MB) and most of `libgallium`, about 180–230 MB in total. On NixOS this is a
+custom `hardware.graphics.package32`; untested sketch:
+
+```nix
+hardware.graphics.package32 = (pkgs.pkgsi686Linux.mesa.override {
+  galliumDrivers = [ "radeonsi" "zink" ];
+  vulkanDrivers = [ "amd" ];
+  vulkanLayers = [ "device-select" ];
+}).overrideAttrs (old: {
+  mesonFlags = old.mesonFlags ++ [
+    "-Dllvm=disabled"
+    "-Damd-use-llvm=false"
+    "-Dgallium-rusticl=false"
+  ];
+});
+```
+
+It costs a local 32-bit Mesa build after each nixpkgs Mesa update, and 32-bit
+programs lose the software renderers, 32-bit OpenCL, and other vendors'
+drivers. 64-bit Mesa is unaffected. Restart Steam after switching.
+
 ## Troubleshooting
 
 - **`nix: command not found`:** install Nix or expose the host Nix client in
