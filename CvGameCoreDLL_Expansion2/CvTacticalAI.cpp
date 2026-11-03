@@ -57,7 +57,6 @@ TUnitFlagLookup gSafePlotCount;
 int gDefaultUnitLossThreshold;
 int gMedianUnitXP;
 int gMinHpForTactsim;
-PlayerTypes eLastTactSimPlayer = NO_PLAYER;
 
 //just some statistics
 unsigned long gMovePlotsCacheHit = 0, gMovePlotsCacheMiss = 0;
@@ -12241,11 +12240,14 @@ vector<STacticalAssignment> TacticalAIHelpers::FindBestUnitAssignments(
 	}
 #endif
 
-	//clean up from the last run, more if the player changed to limit memory usage
-	gTactPosStorage.reset(eLastTactSimPlayer!=ePlayer);
-	gSupportPosStorage.reset(eLastTactSimPlayer!=ePlayer);
-	gAssignmentStorage.reset(eLastTactSimPlayer != ePlayer);
-	eLastTactSimPlayer = ePlayer;
+	//clean up from the last run. a soft reset keeps every container's capacity, so the next
+	//simulation reuses the same buffers. hard resets (wiping all containers whenever the player
+	//changed) freed and reallocated 60-90 MB about 20 times per turn, which fragmented the heap
+	//under Wine/Proton until the 32-bit address space ran out. the kept capacity is bounded:
+	//MAX_TACT_PLOTS per plot table and the unit count per unit list.
+	gTactPosStorage.reset(false);
+	gSupportPosStorage.reset(false);
+	gAssignmentStorage.reset(false);
 
 	gReachablePlotsLookup.clear();
 	gRangeAttackPlotsLookup.clear();
