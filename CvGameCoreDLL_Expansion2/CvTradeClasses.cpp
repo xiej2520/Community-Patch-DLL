@@ -1483,7 +1483,7 @@ void CvGameTrade::ClearAllCityTradeRoutes (CvPlot* pPlot, bool bIncludeTransits)
 
 			// If we have any water routes transiting via this city, we need to cancel them
 			if (bIncludeTransits && m_aTradeConnections[ui].m_eDomain == DOMAIN_SEA) {
-				TradeConnectionPlotList aPlotList = m_aTradeConnections[ui].m_aPlotList;
+				const TradeConnectionPlotList& aPlotList = m_aTradeConnections[ui].m_aPlotList;
 
 				for (uint uiPlotIndex = 0; uiPlotIndex < aPlotList.size(); uiPlotIndex++) {
 					if (aPlotList[uiPlotIndex].m_iX == iX && aPlotList[uiPlotIndex].m_iY == iY) {

@@ -8311,35 +8311,30 @@ void CvPlot::setImprovementType(ImprovementTypes eNewValue, PlayerTypes eBuilder
 
 
 			if (eTradeRouteDomain != NO_DOMAIN) {
-				// Take away any trade routes of this domain that pass through the plot
+				// Take away any trade routes of this domain that pass through the plot.
+				// EndTradeRoute only marks a route as finished, so one pass over the routes is enough,
+				// and the plot lists are read in place instead of being copied for every plot.
 				CvGameTrade* pTrade = GC.getGame().GetGameTrade();
 				int iPlotX = getX();
 				int iPlotY = getY();
 
 				for (uint uiConnection = 0; uiConnection < pTrade->GetNumTradeConnections(); uiConnection++)
 				{
-					CvGameTrade* pTrade = GC.getGame().GetGameTrade();
-					for (uint uiConnection = 0; uiConnection < pTrade->GetNumTradeConnections(); uiConnection++)
-					{
-						const TradeConnection* pConnection = &(pTrade->GetTradeConnection(uiConnection));
-						if (pTrade->IsTradeRouteIndexEmpty(uiConnection))
-						{
-							continue;
-						}
-						for (uint ui = 0; ui < pConnection->m_aPlotList.size(); ui++)
-						{
-							if (pConnection->m_eDomain == eTradeRouteDomain) {
-								TradeConnectionPlotList aPlotList = pConnection->m_aPlotList;
+					if (pTrade->IsTradeRouteIndexEmpty(uiConnection))
+						continue;
 
-								for (uint uiPlotIndex = 0; uiPlotIndex < aPlotList.size(); uiPlotIndex++) {
-									if (aPlotList[uiPlotIndex].m_iX == iPlotX && aPlotList[uiPlotIndex].m_iY == iPlotY)
-									{
-										CUSTOMLOG("Cancelling trade route for domain %i in plot (%i, %i) as enabling improvement destroyed", eTradeRouteDomain, iPlotX, iPlotY);
-										pTrade->EndTradeRoute(pTrade->GetIndexFromID(pConnection->m_iID));
-										break;
-									}
-								}
-							}
+					const TradeConnection& kConnection = pTrade->GetTradeConnection(uiConnection);
+					if (kConnection.m_eDomain != eTradeRouteDomain)
+						continue;
+
+					const TradeConnectionPlotList& aPlotList = kConnection.m_aPlotList;
+					for (uint uiPlotIndex = 0; uiPlotIndex < aPlotList.size(); uiPlotIndex++)
+					{
+						if (aPlotList[uiPlotIndex].m_iX == iPlotX && aPlotList[uiPlotIndex].m_iY == iPlotY)
+						{
+							CUSTOMLOG("Cancelling trade route for domain %i in plot (%i, %i) as enabling improvement destroyed", eTradeRouteDomain, iPlotX, iPlotY);
+							pTrade->EndTradeRoute(pTrade->GetIndexFromID(kConnection.m_iID));
+							break;
 						}
 					}
 				}

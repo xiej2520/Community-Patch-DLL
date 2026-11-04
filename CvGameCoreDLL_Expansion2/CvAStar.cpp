@@ -3374,7 +3374,18 @@ int CvPathFinder::GetPathLengthInTurns(const CvPlot * pStartPlot, const CvPlot *
 
 //	--------------------------------------------------------------------------------
 /// get all plots which can be reached in a certain amount of turns
+// The result can hold one entry per map plot. VC9 does not apply the named return value
+// optimization to a function with try/catch blocks, so the work is done in FillPlotsInReach and
+// this wrapper (no try/catch) lets the compiler build the result in place instead of copying it.
 ReachablePlots CvPathFinder::GetPlotsInReach(int iXstart, int iYstart, const SPathFinderUserData& data)
+{
+	ReachablePlots plots;
+	FillPlotsInReach(iXstart, iYstart, data, plots);
+	return plots;
+}
+
+// plots must be empty; it stays empty if the configuration is invalid or an allocation fails
+void CvPathFinder::FillPlotsInReach(int iXstart, int iYstart, const SPathFinderUserData& data, ReachablePlots& plots)
 {
 	//make sure we don't call this from dll and lua at the same time
 	bool bHadLock = gDLL->HasGameCoreLock();
@@ -3385,10 +3396,8 @@ ReachablePlots CvPathFinder::GetPlotsInReach(int iXstart, int iYstart, const SPa
 	{
 		if(!bHadLock)
 			gDLL->ReleaseGameCoreLock();
-		return ReachablePlots();
+		return;
 	}
-
-	ReachablePlots plots;
 
 	//there is no destination! the return value will always be false
 	CvAStar::FindPathWithCurrentConfiguration(iXstart, iYstart, -1, -1);
@@ -3409,7 +3418,8 @@ ReachablePlots CvPathFinder::GetPlotsInReach(int iXstart, int iYstart, const SPa
 	{
 		if(!bHadLock)
 			gDLL->ReleaseGameCoreLock();
-		return ReachablePlots();
+		plots.clear();
+		return;
 	}
 
 	//iterate all previously touched nodes
@@ -3454,9 +3464,8 @@ ReachablePlots CvPathFinder::GetPlotsInReach(int iXstart, int iYstart, const SPa
 	}
 	catch (const std::bad_alloc&)
 	{
-		return ReachablePlots();
+		plots.clear();
 	}
-	return plots;
 }
 
 ReachablePlots CvPathFinder::GetPlotsInReach(const CvPlot * pStartPlot, const SPathFinderUserData & data)
